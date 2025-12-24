@@ -41,7 +41,7 @@
    DARK THEME COLORS
    ============================================ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     /* Primary Colors */
     --primary: #3498db;
     --primary-dark: #2980b9;
@@ -76,6 +76,36 @@
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.5);
   }
+}
+
+[data-theme="dark"] {
+  --primary: #3498db;
+  --primary-dark: #2980b9;
+  --primary-light: #5dade2;
+
+  --secondary: #2ecc71;
+  --secondary-dark: #27ae60;
+  --secondary-light: #58d68d;
+
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #242424;
+  --bg-tertiary: #2d2d2d;
+
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-light: #888888;
+
+  --border: #3d3d3d;
+  --border-light: #2d2d2d;
+
+  --success: #27d98b;
+  --warning: #f5a623;
+  --error: #ff6b6b;
+  --info: #4ba3ff;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================

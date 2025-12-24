@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CartItem } from '../contexts/CartContext'
+import type { CartItem } from '../context/CartContext'
 import '../styles/MenuItem.css'
 
 interface CustomizationGroup {

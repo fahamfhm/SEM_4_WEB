@@ -1,6 +1,5 @@
 import CustomerMenu from './pages/customer/Menu'
-import { CartProvider } from './contexts/CartContext'
-import './App.css'
+import { CartProvider } from './context/CartContext'
 
 function App() {
   return (

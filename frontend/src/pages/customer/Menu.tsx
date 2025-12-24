@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import MenuItem from '../../components/MenuItem'
 import CategoryFilter from '../../components/CategoryFilter'
-import { useCart } from '../../contexts/CartContext'
-import type { CartItem } from '../../contexts/CartContext'
+import { useCart } from '../../context/CartContext'
+import type { CartItem } from '../../context/CartContext'
 import '../../styles/Menu.css'
 
 interface CustomizationGroup {
