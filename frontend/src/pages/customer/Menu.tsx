@@ -83,7 +83,8 @@ export default function Menu() {
   }
 
   return (
-    <div className="menu-page">
+    <>
+      <div className="menu-page">
       <div className="menu-header">
         <div className="header-content">
           <h1>🍽️ Our Menu</h1>
@@ -133,7 +134,8 @@ export default function Menu() {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
 
@@ -145,7 +147,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Classic Burger',
       description: 'Juicy beef patty with fresh toppings and special sauce',
       basePrice: 450,
-      image: 'https://via.placeholder.com/300x200?text=Classic+Burger',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Burgers',
       isVegetarian: false,
       customizationGroups: [
@@ -178,7 +180,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Veggie Burger',
       description: 'Delicious vegetable patty with special sauce',
       basePrice: 380,
-      image: 'https://via.placeholder.com/300x200?text=Veggie+Burger',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Burgers',
       isVegetarian: true,
       customizationGroups: [
@@ -199,7 +201,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Hot Dog',
       description: 'Premium sausage with mustard and relish',
       basePrice: 300,
-      image: 'https://via.placeholder.com/300x200?text=Hot+Dog',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Hot Dogs',
       isVegetarian: false,
       customizationGroups: [
@@ -220,7 +222,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Iced Tea',
       description: 'Refreshing iced tea with lemon',
       basePrice: 150,
-      image: 'https://via.placeholder.com/300x200?text=Iced+Tea',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Drinks',
       isVegetarian: true,
       customizationGroups: [],
@@ -230,7 +232,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Chocolate Cake',
       description: 'Rich and moist chocolate cake',
       basePrice: 250,
-      image: 'https://via.placeholder.com/300x200?text=Chocolate+Cake',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Desserts',
       isVegetarian: true,
       customizationGroups: [],
@@ -240,7 +242,7 @@ function getDemoMenuItems(): MenuItemData[] {
       name: 'Cheese Burger',
       description: 'Beef patty with melted cheese and fresh vegetables',
       basePrice: 400,
-      image: 'https://via.placeholder.com/300x200?text=Cheese+Burger',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s',
       category: 'Burgers',
       isVegetarian: false,
       customizationGroups: [
