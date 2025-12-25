@@ -24,8 +24,8 @@ const navLinks = {
   ],
   guest: [
     { to: "/menu", label: "Menu" },
-    { to: "/login", label: "Login" },
-    { to: "/register", label: "Register" },
+    { to: "/auth/login", label: "Login" },
+    { to: "/auth/register", label: "Register" },
   ],
 };
 

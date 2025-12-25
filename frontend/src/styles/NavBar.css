@@ -2,10 +2,15 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   padding: 0.5rem 1.5rem;
+  height: 80px;
   display: flex;
   align-items: center;
-}
+  position: fixed;
+  width: 100vw;
+  justify-content: center;
 
+}
+  
 .navbar ul {
   list-style: none;
   display: flex;
