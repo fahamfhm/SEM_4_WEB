@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Profile.module.css";
+import styles from "../../styles/Profile.module.css";
 
 // Example static data, replace with real data or props/context
 const customer = {

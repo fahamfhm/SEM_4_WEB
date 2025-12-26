@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Cart.module.css";
+import styles from "../../styles/Cart.module.css";
 
 // Example static cart data
 const cart = {

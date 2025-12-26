@@ -13,12 +13,13 @@ import KitchenLayout from "./layout/KitchenLayout";
 
 //Auth Pages
 import AuthPage from "./pages/auth/AuthPage";
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 
 // Customer Pages
 import CustomerMenu from "./pages/customer/Menu";
 import CustomerProfile from "./pages/customer/Profile";
 import CustomerCart from "./pages/customer/Cart";
+import Home from "./pages/customer/Home";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -34,7 +35,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
-            <Route path="/" element={ <Navigate to="/menu" />} />
+            <Route path="/" element={ <Home />} />
             <Route path="/auth">
               <Route index element={<Navigate to="/auth/login" />} />
               <Route path="login" element={<AuthPage mode="login" />} />

@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
-import "./AuthPage.css";
+import "../../styles/AuthPage.css";
 
 interface AuthPageProps {
   mode?: "login" | "register";
