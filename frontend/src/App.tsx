@@ -1,15 +1,10 @@
-import {
-  Routes,
-  Route,
-  Navigate,
-  BrowserRouter,
-} from "react-router-dom";
+import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 
 import PublicLayout from "./layout/GuestLayout";
 import CustomerLayout from "./layout/CustomerLayout";
 import AdminLayout from "./layout/AdminLayout";
 import KitchenLayout from "./layout/KitchenLayout";
-
+import { TableProvider } from "./context/TableContext";
 
 //Auth Pages
 import AuthPage from "./pages/auth/AuthPage";
@@ -18,7 +13,7 @@ import AuthPage from "./pages/auth/AuthPage";
 import CustomerMenu from "./pages/customer/Menu";
 import CustomerProfile from "./pages/customer/Profile";
 import CustomerCart from "./pages/customer/Cart";
-import Home from "./pages/customer/Home";
+import Home from "./pages/Home";
 import OrderHistory from "./pages/customer/OrderHistory";
 import OrderTracking from "./pages/customer/OrderTracking";
 import Checkout from "./pages/customer/Checkout";
@@ -38,10 +33,11 @@ import KitchenInventory from "./pages/kitchen/Inventory";
 function App() {
   return (
     <BrowserRouter>
+      <TableProvider>
         <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
-            <Route path="/" element={ <Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/auth">
               <Route index element={<Navigate to="/auth/login" />} />
               <Route path="login" element={<AuthPage mode="login" />} />
@@ -49,7 +45,7 @@ function App() {
             </Route>
           </Route>
 
-        {/* Admin Routes */}
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="menu" element={<MenuManagement />} />
@@ -72,8 +68,8 @@ function App() {
             <Route path="tracking" element={<OrderTracking />} />
             <Route path="checkout" element={<Checkout />} />
           </Route>
-
         </Routes>
+      </TableProvider>
     </BrowserRouter>
   );
 }

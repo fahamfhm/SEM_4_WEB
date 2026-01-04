@@ -1,6 +1,6 @@
 /* Professional Home Page Styles */
 .home-container {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh);
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -51,6 +51,46 @@
   width: 180px;
   z-index: 4;
   box-shadow: var(--shadow-2xl);
+}
+
+/* Table Info Banner */
+.table-info-banner {
+  background: rgba(255, 255, 255, 0.95);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-lg);
+  animation: slideDown 0.5s ease-out;
+  border: 2px solid rgba(255, 107, 53, 0.3);
+}
+
+.table-info-banner.takeaway {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.table-badge {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-bold);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.table-info-banner.takeaway .table-badge {
+  color: #16a34a;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .welcome-text {
