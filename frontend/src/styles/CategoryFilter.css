@@ -1,0 +1,220 @@
+/* Professional Category Filter Component Styles */
+.filter-section {
+  max-width: 1400px;
+  margin: 0 auto var(--space-2xl);
+  background: white;
+  padding: var(--space-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--lighter-gray);
+}
+
+.filter-header {
+  margin-bottom: var(--space-lg);
+}
+
+.filter-header h3 {
+  font-size: var(--font-size-lg);
+  color: var(--dark);
+  margin-bottom: var(--space-md);
+  font-weight: var(--font-bold);
+}
+
+.search-box {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-md) var(--space-lg);
+  border: 2px solid var(--lighter-gray);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-base);
+  margin-bottom: var(--space-lg);
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.filter-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.filter-button {
+  padding: var(--space-sm) var(--space-lg);
+  border: 2px solid var(--lighter-gray);
+  background-color: transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-weight: var(--font-semibold);
+  color: var(--gray);
+  transition: all var(--transition-base);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.filter-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: var(--primary-lighter);
+}
+
+.filter-button.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-color: var(--primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.clear-filters {
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
+  color: var(--gray);
+  border: 1px solid var(--lighter-gray);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-weight: var(--font-semibold);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-base);
+}
+
+.clear-filters:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+  .filter-section {
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .search-box {
+    max-width: 100%;
+  }
+
+  .filter-categories {
+    gap: var(--space-sm);
+  }
+
+  .filter-button {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Search Bar */
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-light);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.category-btn {
+  padding: 10px 20px;
+  border: 2px solid var(--border);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.category-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: var(--bg-primary);
+}
+
+.category-btn.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.category-btn:active {
+  transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-section {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .search-bar {
+    margin-bottom: 15px;
+  }
+
+  .search-input {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+
+  .category-filter {
+    gap: 10px;
+  }
+
+  .category-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-section {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+
+  .category-filter {
+    gap: 8px;
+  }
+
+  .category-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .category-btn:first-child {
+    flex: 1 1 100%;
+  }
+}
