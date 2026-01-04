@@ -4,7 +4,7 @@
   box-shadow: var(--shadow-md);
   /* padding: var(--space-md) var(--space-lg); */
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   height: 70px;
   position: sticky;
