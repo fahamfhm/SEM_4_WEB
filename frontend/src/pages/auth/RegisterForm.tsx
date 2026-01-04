@@ -1,5 +1,5 @@
 import React from 'react';
-
+import '../../styles/RegisterForm.css';
 
 interface RegisterFormProps {
   onToggle: () => void;

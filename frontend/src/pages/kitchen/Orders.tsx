@@ -1,3 +1,4 @@
+import '../../styles/KitchenOrders.css';
 
 const KitchenOrders = () => (
   <>

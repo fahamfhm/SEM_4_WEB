@@ -1,74 +1,148 @@
+/* Professional User Profile Styles */
 .profile-page-center {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
+  min-height: calc(100vh - 70px);
+  padding: var(--space-2xl) var(--space-md);
+  background: var(--bg-light);
 }
 
 .profile-container {
-  width: 400px;
-  max-width: 98vw;
-  background: var(--bg-panel);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  padding: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  animation: slideUp var(--transition-slow);
 }
 
 .profile-header {
   text-align: center;
-  padding: 32px 32px 0 32px;
+  margin-bottom: var(--space-3xl);
 }
 
-.profile-header h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 8px;
+.profile-header h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-extrabold);
+  color: var(--dark);
+  margin-bottom: var(--space-md);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.profile-header p {
-  color: var(--text-muted);
-  margin-bottom: 24px;
+.profile-content {
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2xl);
+  border: 1px solid var(--lighter-gray);
+}
+
+.profile-section {
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-2xl);
+  border-bottom: 1px solid var(--lighter-gray);
+}
+
+.profile-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.profile-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-bold);
+  color: var(--dark);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.profile-item {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
+}
+
+.profile-label {
+  font-weight: var(--font-semibold);
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-value {
+  color: var(--dark);
+  font-size: var(--font-size-base);
+  word-break: break-word;
+}
+
+.profile-edit-btn {
+  padding: var(--space-md) var(--space-2xl);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-bold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  margin-top: var(--space-lg);
+}
+
+.profile-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 48px;
+  font-weight: var(--font-bold);
+  margin: 0 auto var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .profile-item {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .profile-label {
+    display: none;
+  }
+
+  .profile-content {
+    padding: var(--space-lg);
+  }
 }
 
 .profile-details {
   min-height: 340px;
-  padding: 0 32px 32px 32px;
+  padding: 0 var(--space-2xl) var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.profile-field {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.profile-label {
-  font-weight: 600;
-  color: var(--text-muted);
-  font-size: 1rem;
-}
-
-.profile-value {
-  padding: 12px 0;
-  color: var(--text-main);
-  font-size: 1.08rem;
-  border-bottom: 1px solid var(--input-border);
+  gap: var(--space-lg);
 }
 
 @media (max-width: 600px) {
   .profile-container {
     width: 100vw;
-    border-radius: 0;
-    box-shadow: none;
   }
+
   .profile-header {
-    padding: 24px 8px 0 8px;
+    padding: var(--space-xl) var(--space-xs) 0;
   }
+
   .profile-details {
-    padding: 0 12px 24px 12px;
+    padding: 0 var(--space-md) var(--space-lg);
   }
 }

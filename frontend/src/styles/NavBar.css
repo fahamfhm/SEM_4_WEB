@@ -1,31 +1,86 @@
+/* Professional NavBar Styles */
 .navbar {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  padding: 0.5rem 1.5rem;
-  height: 80px;
+  background-color: var(--bg-lighter);
+  box-shadow: var(--shadow-md);
+  /* padding: var(--space-md) var(--space-lg); */
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  position: fixed;
-  width: 100vw;
-  justify-content: center;
-
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  border-bottom: 2px solid var(--lighter-gray);
 }
-  
+
+.navbar-brand {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-extrabold);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+
 .navbar ul {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-lg);
   margin: 0;
   padding: 0;
 }
 
+.navbar li {
+  position: relative;
+  margin: 0;
+}
+
 .navbar a {
-  color: #fff;
+  color: var(--gray);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-base);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .navbar a:hover {
-  color: #ff9800;
+  color: var(--primary);
+  background-color: var(--bg-light);
+}
+
+.navbar a.active {
+  color: var(--primary);
+  font-weight: var(--font-bold);
+  border-bottom: 3px solid var(--primary);
+}
+
+@media (max-width: 768px) {
+  .navbar ul {
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-lighter);
+    gap: 0;
+    display: none;
+  }
+
+  .navbar ul.active {
+    display: flex;
+  }
+
+  .navbar li {
+    border-bottom: 1px solid var(--lighter-gray);
+  }
+
+  .navbar a {
+    padding: var(--space-md);
+    border-radius: 0;
+  }
 }

@@ -13,19 +13,25 @@ import KitchenLayout from "./layout/KitchenLayout";
 
 //Auth Pages
 import AuthPage from "./pages/auth/AuthPage";
-// import { useLocation } from "react-router-dom";
 
 // Customer Pages
 import CustomerMenu from "./pages/customer/Menu";
 import CustomerProfile from "./pages/customer/Profile";
 import CustomerCart from "./pages/customer/Cart";
 import Home from "./pages/customer/Home";
+import OrderHistory from "./pages/customer/OrderHistory";
+import OrderTracking from "./pages/customer/OrderTracking";
+import Checkout from "./pages/customer/Checkout";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
+import MenuManagement from "./pages/admin/MenuManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import Analytics from "./pages/admin/Analytics";
 
 // Kitchen Pages
 import KitchenOrders from "./pages/kitchen/Orders";
+import KitchenInventory from "./pages/kitchen/Inventory";
 
 // import KitchenOrders from "./pages/kitchen/Orders";
 
@@ -43,14 +49,18 @@ function App() {
             </Route>
           </Route>
 
-          {/* Admin Routes */}
+        {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="menu" element={<MenuManagement />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="analytics" element={<Analytics />} />
           </Route>
 
           {/* Kitchen Routes */}
           <Route path="/kitchen" element={<KitchenLayout />}>
             <Route path="orders" element={<KitchenOrders />} />
+            <Route path="inventory" element={<KitchenInventory />} />
           </Route>
 
           {/* Customer Routes */}
@@ -58,6 +68,9 @@ function App() {
             <Route path="menu" element={<CustomerMenu />} />
             <Route path="profile" element={<CustomerProfile />} />
             <Route path="cart" element={<CustomerCart />} />
+            <Route path="orders" element={<OrderHistory />} />
+            <Route path="tracking" element={<OrderTracking />} />
+            <Route path="checkout" element={<Checkout />} />
           </Route>
 
         </Routes>

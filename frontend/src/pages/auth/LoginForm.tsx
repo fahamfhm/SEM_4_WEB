@@ -1,5 +1,5 @@
 import React from 'react';
-
+import '../../styles/LoginForm.css';
 
 interface LoginFormProps {
   onToggle: () => void;
