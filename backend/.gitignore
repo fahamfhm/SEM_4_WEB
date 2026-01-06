@@ -26,3 +26,7 @@ dist/
 
 # Coverage
 coverage/
+
+# Uploads (images)
+uploads/menu-images/*
+!uploads/menu-images/.gitkeep
