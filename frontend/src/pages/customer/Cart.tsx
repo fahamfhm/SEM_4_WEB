@@ -90,6 +90,20 @@ const Cart = () => {
                       ))}
                     </div>
                   )}
+
+                  {item.removals && item.removals.length > 0 && (
+                    <div className={styles['cart-item-removals']}>
+                      <p className={styles['removal-title']}>🚫 Removed:</p>
+                      <p className={styles['removal-list']}>{item.removals.join(', ')}</p>
+                    </div>
+                  )}
+
+                  {item.specialNote && (
+                    <div className={styles['cart-item-note']}>
+                      <p className={styles['note-title']}>📝 Special Instructions:</p>
+                      <p className={styles['note-text']}>{item.specialNote}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles['cart-item-actions']}>

@@ -52,7 +52,7 @@ const menuItemSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Please specify a category"],
-      enum: ["Burgers", "Hot Dogs", "Drinks", "Desserts", "Sides", "Specials"],
+      enum: ["Main Dishes", "Beverages", "Desserts", "Sides", "Specials"],
     },
     basePrice: {
       type: Number,
@@ -65,7 +65,7 @@ const menuItemSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      default: "https://via.placeholder.com/400x300?text=No+Image",
+      default: "https://placehold.co/400x300/png?text=No+Image",
     },
     imagePublicId: {
       type: String, // Cloudinary public ID for deletion

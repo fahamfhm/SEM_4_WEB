@@ -243,27 +243,21 @@ const Checkout: React.FC = () => {
             {/* Order Type Section */}
             <section className="form-section">
               <h2>Order Type</h2>
-              <div className="form-group">
-                <label className="radio-label_2">
-                  <input
-                    type="radio"
-                    name="orderType"
-                    value="dine-in"
-                    checked={formData.orderType === 'dine-in'}
-                    onChange={handleInputChange}
-                  />
-                  <span>🍽️ Dine-In</span>
-                </label>
-                <label className="radio-label_1">
-                  <input
-                    type="radio"
-                    name="orderType"
-                    value="takeaway"
-                    checked={formData.orderType === 'takeaway'}
-                    onChange={handleInputChange}
-                  />
-                  <span>🛍️ Takeaway</span>
-                </label>
+              <div className="order-type-tags">
+                <div 
+                  className={`order-tag ${formData.orderType === 'dine-in' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'dine-in' }))}
+                >
+                  <span className="tag-icon">🍽️</span>
+                  <span className="tag-text">Dine-In</span>
+                </div>
+                <div 
+                  className={`order-tag ${formData.orderType === 'takeaway' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'takeaway' }))}
+                >
+                  <span className="tag-icon">🛍️</span>
+                  <span className="tag-text">Takeaway</span>
+                </div>
               </div>
             </section>
 

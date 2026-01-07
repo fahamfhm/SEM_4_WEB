@@ -51,7 +51,7 @@ export default function Menu() {
     const fetchMenuItems = async () => {
       try {
         setLoading(true)
-        const response = await axios.get(`${API_BASE_URL}/menu/items`)
+        const response = await axios.get(`${API_BASE_URL}/menu/items?limit=100`)
         setMenuItems(response.data.data || [])
         setError('')
       } catch (err) {
@@ -91,17 +91,35 @@ export default function Menu() {
   )
 
   // Group items by category/type
-  const groupedItems = useMemo(() => 
-    filteredItems.reduce((groups, item) => {
+  const groupedItems = useMemo(() => {
+    const groups = filteredItems.reduce((groups, item) => {
       const category = item.category
       if (!groups[category]) {
         groups[category] = []
       }
       groups[category].push(item)
       return groups
-    }, {} as Record<string, MenuItemData[]>),
-    [filteredItems]
-  )
+    }, {} as Record<string, MenuItemData[]>)
+    
+    // Sort categories in specific order
+    const categoryOrder = ['Main Dishes', 'Beverages', 'Desserts', 'Sides', 'Specials']
+    const sortedGroups: Record<string, MenuItemData[]> = {}
+    
+    categoryOrder.forEach(category => {
+      if (groups[category]) {
+        sortedGroups[category] = groups[category]
+      }
+    })
+    
+    // Add any remaining categories not in the order
+    Object.keys(groups).forEach(category => {
+      if (!sortedGroups[category]) {
+        sortedGroups[category] = groups[category]
+      }
+    })
+    
+    return sortedGroups
+  }, [filteredItems])
 
   const handleAddToCart = useCallback((itemDetails: CartItem) => {
     addToCart(itemDetails)
@@ -155,8 +173,9 @@ export default function Menu() {
                     <div className="menu-grid">
                       {items.map(item => (
                         <MenuItem
-                          key={item.id}
+                          key={item.id || item._id}
                           {...item}
+                          id={item.id || item._id}
                           onAddToCart={handleAddToCart}
                         />
                       ))}
@@ -169,8 +188,9 @@ export default function Menu() {
               <div className="menu-grid">
                 {filteredItems.map(item => (
                   <MenuItem
-                    key={item.id}
+                    key={item.id || item._id}
                     {...item}
+                    id={item.id || item._id}
                     onAddToCart={handleAddToCart}
                   />
                 ))}

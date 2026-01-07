@@ -54,13 +54,19 @@ export const getMenuItems = async (req, res, next) => {
       .skip(skip)
       .limit(parseInt(limit));
 
+    // Transform items to include id field
+    const transformedItems = items.map(item => ({
+      ...item.toObject(),
+      id: item._id.toString()
+    }));
+
     // Get total count for pagination
     const total = await MenuItem.countDocuments(query);
 
     res.status(200).json({
       success: true,
-      count: items.length,
-      data: items,
+      count: transformedItems.length,
+      data: transformedItems,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

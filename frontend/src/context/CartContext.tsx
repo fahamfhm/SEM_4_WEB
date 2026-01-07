@@ -12,6 +12,8 @@ export interface CartItem {
     selectedOptions: Array<{ id: string; name: string; price: number }>
   }[]
   itemTotal: number
+  removals?: string[]
+  specialNote?: string
 }
 
 interface CartContextType {

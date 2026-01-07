@@ -35,6 +35,8 @@ const MenuItem = ({
   const [showModal, setShowModal] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [customizations, setCustomizations] = useState<Record<string, string[]>>({})
+  const [removals, setRemovals] = useState<string[]>([])
+  const [specialNote, setSpecialNote] = useState('')
 
   const handleCustomizationChange = (groupId: string, optionId: string, isMultiple: boolean) => {
     setCustomizations(prev => {
@@ -49,6 +51,14 @@ const MenuItem = ({
         return { ...prev, [groupId]: [optionId] }
       }
     })
+  }
+
+  const toggleRemoval = (ingredient: string) => {
+    setRemovals(prev => 
+      prev.includes(ingredient) 
+        ? prev.filter(item => item !== ingredient)
+        : [...prev, ingredient]
+    )
   }
 
   const calculateCustomizationPrice = () => {
@@ -86,12 +96,16 @@ const MenuItem = ({
       basePrice,
       quantity,
       customizations: customizationDetails,
-      itemTotal
+      itemTotal,
+      removals,
+      specialNote
     })
 
     setShowModal(false)
     setQuantity(1)
     setCustomizations({})
+    setRemovals([])
+    setSpecialNote('')
   }
 
   const itemPrice = basePrice + calculateCustomizationPrice()
@@ -106,7 +120,7 @@ const MenuItem = ({
             className="menu-item-image" 
             loading="lazy"
             onError={(e) => {
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=' + encodeURIComponent(name)
+              e.currentTarget.src = 'https://placehold.co/300x200/png?text=' + encodeURIComponent(name)
             }} 
           />
           {isVegetarian && <span className="veg-badge">🌱</span>}
@@ -139,7 +153,7 @@ const MenuItem = ({
                   className="modal-image" 
                   loading="lazy"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/500x300?text=' + encodeURIComponent(name)
+                    e.currentTarget.src = 'https://placehold.co/500x300/png?text=' + encodeURIComponent(name)
                   }} 
                 />
                 <p>{description}</p>
@@ -147,7 +161,7 @@ const MenuItem = ({
 
               {customizationGroups.length > 0 && (
                 <div className="customization-section">
-                  <h3>Customize</h3>
+                  <h3>✨ Add Extras</h3>
                   {customizationGroups.map(group => (
                     <div key={group.id} className="customization-group">
                       <label className="group-label">
@@ -175,6 +189,42 @@ const MenuItem = ({
                   ))}
                 </div>
               )}
+
+              {/* Remove Items Section */}
+              <div className="removal-section">
+                <h3>🚫 Remove Ingredients</h3>
+                <p className="removal-note">No price change for removals</p>
+                <div className="removal-options">
+                  {['Onions', 'Tomatoes', 'Lettuce', 'Pickles', 'Cheese'].map(ingredient => (
+                    <label key={ingredient} className="removal-label">
+                      <input
+                        type="checkbox"
+                        checked={removals.includes(ingredient)}
+                        onChange={() => toggleRemoval(ingredient)}
+                      />
+                      <span>{ingredient}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Special Note Section */}
+              <div className="note-section">
+                <h3>📝 Special Instructions</h3>
+                <div className="note-input-wrapper">
+                  <textarea
+                    placeholder="Any special requests? (e.g., extra spicy, well done, no mayo)"
+                    value={specialNote}
+                    onChange={(e) => setSpecialNote(e.target.value)}
+                    className="special-note-input"
+                    rows={3}
+                    maxLength={200}
+                  />
+                  <div className={`char-count ${specialNote.length > 180 ? 'danger' : specialNote.length > 150 ? 'warning' : ''}`}>
+                    {specialNote.length}/200
+                  </div>
+                </div>
+              </div>
 
               <div className="quantity-section">
                 <label>Quantity:</label>

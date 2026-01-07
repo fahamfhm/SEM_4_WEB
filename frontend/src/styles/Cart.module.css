@@ -168,6 +168,57 @@
   font-weight: var(--font-semibold);
 }
 
+/* Removals Section */
+.cart-item-removals {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid #ff6b6b;
+  margin-top: var(--space-md);
+}
+
+.removal-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-bold);
+  color: #c92a2a;
+  margin: 0 0 var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.removal-list {
+  color: #495057;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Special Note Section */
+.cart-item-note {
+  background: linear-gradient(135deg, #fff9db 0%, #ffe8a1 100%);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid #ffd43b;
+  margin-top: var(--space-md);
+}
+
+.note-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-bold);
+  color: #e67700;
+  margin: 0 0 var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.note-text {
+  color: #495057;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 /* Cart Item Actions */
 .cart-item-actions {
   display: flex;
