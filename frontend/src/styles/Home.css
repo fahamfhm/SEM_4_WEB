@@ -9,7 +9,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(var(--space-lg), 3vw, var(--space-3xl)) clamp(var(--space-md), 4vw, var(--space-xl));
   overflow-x: hidden;
   background: url(../../public/wood-board.jpeg);
   background-attachment: fixed;
@@ -61,7 +60,6 @@
 .home-content {
   position: relative;
   width: 100%;
-  max-width: 1180px;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: clamp(var(--space-2xl), 5vw, var(--space-3xl));
@@ -256,7 +254,7 @@
 
 .home-right {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   align-items: center;
   animation: home-fade-rise 1s ease-out forwards;
 }
