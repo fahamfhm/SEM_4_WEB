@@ -208,3 +208,151 @@ textarea {
   border-left: 4px solid var(--info);
   color: var(--info);
 }
+
+:root {
+  --fc-yellow: #ffb300;
+  --fc-red: #d32f2f;
+  --fc-dark-red: #7b1f1f;
+  --fc-deep-red: #3d0a0a;
+  --fc-light: #f5f5f5;
+  --fc-text: #fdfdfd;
+  --fc-muted-text: #ddd;
+  --fc-bg: #121212;
+  --fc-card-bg: #1f1f1f;
+  --fc-border-radius: 12px;
+  --fc-shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.6);
+  --fc-transition: 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, var(--fc-dark-red), var(--fc-bg));
+  color: var(--fc-text);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.fc-primary-btn {
+  background: linear-gradient(90deg, var(--fc-yellow), var(--fc-red));
+  color: #1b1b1b;
+  border: none;
+  padding: 0.75rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: var(--fc-shadow-soft);
+  transition: transform var(--fc-transition), box-shadow var(--fc-transition),
+    filter var(--fc-transition);
+}
+
+.fc-primary-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.fc-secondary-btn {
+  background: transparent;
+  border-radius: 999px;
+  border: 2px solid var(--fc-yellow);
+  padding: 0.7rem 1.6rem;
+  color: var(--fc-light);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: background var(--fc-transition), color var(--fc-transition),
+    transform var(--fc-transition);
+}
+
+.fc-secondary-btn:hover {
+  background: rgba(255, 179, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.fc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.fc-tag-yellow {
+  background: rgba(255, 179, 0, 0.16);
+  color: #ffe082;
+}
+
+.fc-tag-red {
+  background: rgba(211, 47, 47, 0.16);
+  color: #ffcdd2;
+}
+
+.fc-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, var(--fc-yellow), var(--fc-red));
+  color: #1b1b1b;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
+}
+
+.fc-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.2rem 3rem;
+}
+
+.fc-section-title {
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fc-light);
+}
+
+.fc-badge-status {
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fc-badge-preparing {
+  background: rgba(255, 179, 0, 0.2);
+  color: #ffe082;
+}
+
+.fc-badge-ready {
+  background: rgba(76, 175, 80, 0.2);
+  color: #c8e6c9;
+}
+
+.fc-badge-placed {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}

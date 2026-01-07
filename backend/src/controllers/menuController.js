@@ -244,6 +244,7 @@ export const updateAvailability = async (req, res, next) => {
 // @desc    Get all categories
 // @route   GET /api/menu/categories
 // @access  Public
+
 export const getCategories = async (req, res, next) => {
   try {
     const categories = await MenuItem.distinct("category");
@@ -260,6 +261,7 @@ export const getCategories = async (req, res, next) => {
 // @desc    Add customization group to menu item
 // @route   POST /api/menu/items/:id/customizations
 // @access  Private/Admin
+
 export const addCustomizationGroup = async (req, res, next) => {
   try {
     const item = await MenuItem.findById(req.params.id);
@@ -284,6 +286,7 @@ export const addCustomizationGroup = async (req, res, next) => {
 // @desc    Update customization group
 // @route   PUT /api/menu/items/:id/customizations/:groupId
 // @access  Private/Admin
+
 export const updateCustomizationGroup = async (req, res, next) => {
   try {
     const item = await MenuItem.findById(req.params.id);
@@ -321,6 +324,7 @@ export const updateCustomizationGroup = async (req, res, next) => {
 // @desc    Delete customization group
 // @route   DELETE /api/menu/items/:id/customizations/:groupId
 // @access  Private/Admin
+
 export const deleteCustomizationGroup = async (req, res, next) => {
   try {
     const item = await MenuItem.findById(req.params.id);
