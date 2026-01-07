@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 import '../../styles/OrderTracking.css';
 
 interface OrderStatus {
@@ -20,10 +21,40 @@ interface TrackingOrder {
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const OrderTracking: React.FC = () => {
+  const location = useLocation();
+  const isGuestMode = location.pathname.includes('/guest');
+  
   const [order, setOrder] = useState<TrackingOrder | null>(null);
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Load guest order from session storage
+  useEffect(() => {
+    if (isGuestMode) {
+      const guestOrderData = sessionStorage.getItem('guestOrderData');
+      if (guestOrderData) {
+        const orderData = JSON.parse(guestOrderData);
+        setOrder({
+          id: orderData.orderNumber,
+          orderNumber: orderData.orderNumber,
+          estimatedTime: 20,
+          currentStatus: 'placed',
+          statuses: [
+            { stage: 'placed', completed: true, timestamp: orderData.timestamp },
+            { stage: 'accepted', completed: false },
+            { stage: 'preparing', completed: false },
+            { stage: 'ready', completed: false },
+            { stage: 'delivered', completed: false }
+          ],
+          items: orderData.items.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity
+          }))
+        });
+      }
+    }
+  }, [isGuestMode]);
 
   const fetchOrder = async (id: string) => {
     try {

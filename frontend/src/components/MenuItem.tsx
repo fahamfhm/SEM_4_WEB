@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import type { CartItem } from '../context/CartContext'
 import '../styles/MenuItem.css'
 
@@ -22,7 +22,7 @@ interface MenuItemProps {
   onAddToCart: (itemDetails: CartItem) => void
 }
 
-export default function MenuItem({
+const MenuItem = ({
   id,
   name,
   description,
@@ -31,7 +31,7 @@ export default function MenuItem({
   isVegetarian,
   customizationGroups,
   onAddToCart,
-}: MenuItemProps) {
+}: MenuItemProps) => {
   const [showModal, setShowModal] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [customizations, setCustomizations] = useState<Record<string, string[]>>({})
@@ -100,9 +100,15 @@ export default function MenuItem({
     <>
       <div className="menu-item-card">
         <div className="menu-item-image-container">
-          <img src={image} alt={name} className="menu-item-image" onError={(e) => {
-            e.currentTarget.src = 'https://via.placeholder.com/300x200?text=' + encodeURIComponent(name)
-          }} />
+          <img 
+            src={image} 
+            alt={name} 
+            className="menu-item-image" 
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=' + encodeURIComponent(name)
+            }} 
+          />
           {isVegetarian && <span className="veg-badge">🌱</span>}
         </div>
         <div className="menu-item-content">
@@ -127,9 +133,15 @@ export default function MenuItem({
 
             <div className="modal-body">
               <div className="item-details">
-                <img src={image} alt={name} className="modal-image" onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/500x300?text=' + encodeURIComponent(name)
-                }} />
+                <img 
+                  src={image} 
+                  alt={name} 
+                  className="modal-image" 
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/500x300?text=' + encodeURIComponent(name)
+                  }} 
+                />
                 <p>{description}</p>
               </div>
 
@@ -195,3 +207,4 @@ export default function MenuItem({
     </>
   )
 }
+export default memo(MenuItem)

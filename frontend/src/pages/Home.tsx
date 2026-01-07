@@ -26,13 +26,13 @@ const Home = () => {
 
   // Derive showTableInfo from context state instead of managing it separately
   // const showTableInfo = diningType === 'table' && tableNumber;
-
-  const handleMenuClick = () => {
-    navigate("/menu");
-  };
   
   const HandleLoginClick = () => {
     navigate("/auth/login");
+  };
+  
+  const handleGuestOrderClick = () => {
+    navigate("/guest/menu");
   };
   return (
     <div className="home-root">
@@ -80,24 +80,24 @@ const Home = () => {
               <div className="home-actions">
                 <button
                   className="fc-primary-btn home-btn home-btn-glow"
-                  onClick={handleMenuClick}
+                  onClick={handleGuestOrderClick}
                 >
-                  View Menu
+                  🍔 Order as Guest
                 </button>
                 <button
                   className="fc-secondary-btn home-btn home-btn-outline"
                   onClick={HandleLoginClick}
                 >
-                  Take Away
+                  👤 Sign In / Register
                 </button>
               </div>
 
               <div className="home-badges">
                 <span className="fc-chip">
-                  <span className="home-dot-live" /> Live kitchen tracking
+                  <span className="home-dot-live" /> No account needed
                 </span>
                 <span className="fc-chip">
-                  <span>✨</span> Fully customisable orders
+                  <span>✨</span> Quick & Easy ordering
                 </span>
               </div>
             </div>

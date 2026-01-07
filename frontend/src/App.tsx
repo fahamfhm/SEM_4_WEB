@@ -43,6 +43,13 @@ function App() {
               <Route path="login" element={<AuthPage mode="login" />} />
               <Route path="register" element={<AuthPage mode="register" />} />
             </Route>
+            {/* Guest Ordering Routes */}
+            <Route path="/guest">
+              <Route path="menu" element={<CustomerMenu />} />
+              <Route path="cart" element={<CustomerCart />} />
+              <Route path="checkout" element={<Checkout />} />
+              <Route path="order-tracking" element={<OrderTracking />} />
+            </Route>
           </Route>
 
           {/* Admin Routes */}
@@ -59,13 +66,13 @@ function App() {
             <Route path="inventory" element={<KitchenInventory />} />
           </Route>
 
-          {/* Customer Routes */}
-          <Route path="/" element={<CustomerLayout />}>
+          {/* Customer Routes (Logged In) */}
+          <Route path="/customer" element={<CustomerLayout />}>
             <Route path="menu" element={<CustomerMenu />} />
             <Route path="profile" element={<CustomerProfile />} />
             <Route path="cart" element={<CustomerCart />} />
             <Route path="orders" element={<OrderHistory />} />
-            <Route path="tracking" element={<OrderTracking />} />
+            <Route path="order-tracking" element={<OrderTracking />} />
             <Route path="checkout" element={<Checkout />} />
           </Route>
         </Routes>

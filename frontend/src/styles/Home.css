@@ -232,6 +232,7 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-lg);
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
@@ -474,7 +475,7 @@
 /* Tablet landscape mode */
 @media (max-width: 900px) and (orientation: landscape) {
   .home-root {
-    min-height: auto;
+    min-height: 0;
     padding: clamp(var(--space-lg), 3vh, var(--space-2xl)) clamp(var(--space-md), 3vw, var(--space-xl));
   }
   
@@ -575,7 +576,7 @@
 /* Phone landscape mode */
 @media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
   .home-root {
-    min-height: auto;
+    min-height: 0;
     padding: var(--space-md) var(--space-xl);
   }
   
@@ -700,7 +701,7 @@
 @media print {
   .home-root {
     background: white !important;
-    min-height: auto;
+    min-height: 0;
   }
   
   .home-vignette,
