@@ -139,9 +139,6 @@
 /* Form Inputs */
 .form-group {
   margin-bottom: var(--space-lg);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
 }
 
 .form-input, .form-textarea {
@@ -188,8 +185,6 @@
   font-weight: 500;
   position: relative;
   overflow: hidden;
-  flex: 1 1 calc(50% - 8px);
-  min-width: 180px;
 }
 
 .radio-label::before {
@@ -239,16 +234,11 @@
   z-index: 1;
 }
 
-/* Order Type Radio Group - Force side by side display */
-.form-section .form-group {
+/* Order Type Radio Group - Only apply grid to groups with radio labels */
+.form-group:has(.radio-label) {
   display: grid !important;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  align-items: stretch;
-}
-
-.form-section .form-group .radio-label {
-  width: 100%;
 }
 
 /* Payment Methods */
