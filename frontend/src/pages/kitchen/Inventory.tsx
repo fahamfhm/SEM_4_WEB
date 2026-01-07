@@ -525,13 +525,8 @@ const KitchenInventory = () => {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
+                    className="modal-select"
+                    title="Select item category"
                   >
                     {CATEGORIES.filter(c => c !== 'all').map(cat => (
                       <option key={cat} value={cat}>{cat}</option>

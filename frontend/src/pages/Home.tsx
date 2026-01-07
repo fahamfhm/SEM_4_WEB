@@ -1,7 +1,7 @@
 
 import "../styles/Home.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect} from "react";
 import { useTable } from "../context/TableContext";
 
 const Home = () => {
@@ -25,48 +25,97 @@ const Home = () => {
   }, [searchParams, tableNumber, diningType, setTableInfo]);
 
   // Derive showTableInfo from context state instead of managing it separately
-  const showTableInfo = diningType === 'table' && tableNumber;
-
-  const handleMenuClick = () => {
-    navigate("/menu");
-  };
+  // const showTableInfo = diningType === 'table' && tableNumber;
   
   const HandleLoginClick = () => {
     navigate("/auth/login");
   };
+  
+  const handleGuestOrderClick = () => {
+    navigate("/guest/menu");
+  };
   return (
-    <div className="home-container">
-      {/* <div className="home-left">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Burger" className="burger-img" />
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Flame" className="flame-img" />
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Onion" className="topping onion" />
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Tomato" className="topping tomato" />
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Leaf" className="topping leaf" />
-      </div> */}
-      <div className="home-right">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZB2Gowv5fYnRQWS7mMR5-mDUVeC8nfhbQaQ&s" alt="Pizza" className="pizza-img" />
-        
-        {/* Table Info Display */}
-        {showTableInfo && (
-          <div className="table-info-banner">
-            <span className="table-badge">📍 Table {tableNumber}</span>
+    <div className="home-root">
+      {/* vignette over wooden background */}
+      <div className="home-vignette" />
+
+      {/* many floating food icons in background */}
+      <div className="home-bg-icon home-bg-icon-1">🍕</div>
+      <div className="home-bg-icon home-bg-icon-2">🥤</div>
+      <div className="home-bg-icon home-bg-icon-3">🍟</div>
+      <div className="home-bg-icon home-bg-icon-4">🌶️</div>
+      <div className="home-bg-icon home-bg-icon-5">🥗</div>
+      <div className="home-bg-icon home-bg-icon-6">🍅</div>
+      <div className="home-bg-icon home-bg-icon-7">🧀</div>
+      <div className="home-bg-icon home-bg-icon-8">🥓</div>
+      <div className="home-bg-icon home-bg-icon-9">🍩</div>
+      <div className="home-bg-icon home-bg-icon-10">🧅</div>
+      <div className="home-bg-icon home-bg-icon-11">🍇</div>
+
+      <div className="home-content">
+        {/* LEFT: logo, text & buttons */}
+        <section className="home-left">
+          <div className="home-logo-row">
+            {/* <div className="home-logo-icon-wrapper">
+              <div className="home-logo-icon-glow" />
+              <div className="fc-icon-circle home-logo-icon home-logo-icon-large">
+                🍔
+              </div>
+            </div> */}
+
+            {/* centre this block relative to left column, not including icon */}
+            <div className="home-logo-and-text">
+              <div className="home-logo-text">
+                <span className="home-logo-small">WELCOME TO</span>
+                <h1 className="home-logo-main">
+                  FOOD <span>COURT</span>
+                </h1>
+              </div>
+
+              <p className="home-tagline">
+                From sizzling burgers to stone‑baked pizza, customise every bite
+                just the way you crave.
+              </p>
+
+              <div className="home-actions">
+                <button
+                  className="fc-primary-btn home-btn home-btn-glow"
+                  onClick={handleGuestOrderClick}
+                >
+                  🍔 Order as Guest
+                </button>
+                <button
+                  className="fc-secondary-btn home-btn home-btn-outline"
+                  onClick={HandleLoginClick}
+                >
+                  👤 Sign In / Register
+                </button>
+              </div>
+
+              <div className="home-badges">
+                <span className="fc-chip">
+                  <span className="home-dot-live" /> No account needed
+                </span>
+                <span className="fc-chip">
+                  <span>✨</span> Quick & Easy ordering
+                </span>
+              </div>
+            </div>
           </div>
-        )}
-        {diningType === 'takeaway' && !tableNumber && (
-          <div className="table-info-banner takeaway">
-            <span className="table-badge">🛍️ Takeaway</span>
+        </section>
+
+        {/* RIGHT: rounded rectangle with burger image */}
+        <section className="home-right">
+          <div className="home-card">
+            <div className="home-fire-glow" />
+            <img
+              src="/burger.png" /* or /burger.jpg */
+              alt="Cheesy burger"
+              className="home-burger-image tilted"
+            />
           </div>
-        )}
-        
-        <h1 className="welcome-text">WELCOME TO</h1>
-        <h1 className="foodcourt-text">
-          FOOD<span className="flame-icon">🔥</span>
-          <span className="court-red">COURT</span>
-        </h1>
-        <button className="view-menu-btn" onClick={handleMenuClick}>View Menu</button>
-        <button className="view-menu-btn" onClick={HandleLoginClick}>Login</button>
+        </section>
       </div>
-      
     </div>
   );
 };

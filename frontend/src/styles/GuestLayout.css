@@ -19,11 +19,7 @@
   width: 100%;
 }
 
-@media (max-width: 768px) {
-  .guest-layout {
-    padding-top: 60px;
-  }
-}
+
 
 .guest-layout main {
   min-height: calc(100vh - 60px);

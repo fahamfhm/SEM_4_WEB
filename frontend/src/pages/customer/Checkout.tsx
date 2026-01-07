@@ -1,22 +1,46 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../../styles/Checkout.css';
 import { useCart } from '../../context/CartContext';
 
 interface CheckoutFormData {
   orderType: 'dine-in' | 'takeaway';
   tableNumber?: string;
-  paymentMethod: 'cash' | 'online';
+  paymentMethod: 'card' | 'cash';
   specialNotes: string;
+  // Guest info
+  customerName?: string;
+  customerPhone?: string;
+}
+
+interface CardDetails {
+  cardNumber: string;
+  cardName: string;
+  expiryDate: string;
+  cvv: string;
 }
 
 const Checkout: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { cartTotal, items, clearCart } = useCart();
+  const isGuestMode = location.pathname.includes('/guest');
+  
   const [formData, setFormData] = useState<CheckoutFormData>({
     orderType: 'dine-in',
     paymentMethod: 'cash',
-    specialNotes: ''
+    specialNotes: '',
+    customerName: '',
+    customerPhone: ''
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    cardNumber: '',
+    cardName: '',
+    expiryDate: '',
+    cvv: ''
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -26,21 +50,144 @@ const Checkout: React.FC = () => {
     }));
   };
 
+  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let formattedValue = value;
+
+    // Format card number with spaces every 4 digits
+    if (name === 'cardNumber') {
+      formattedValue = value
+        .replace(/\s/g, '')
+        .replace(/(\d{4})/g, '$1 ')
+        .trim()
+        .substring(0, 19); // 16 digits + 3 spaces
+    }
+    
+    // Format expiry date as MM/YY
+    if (name === 'expiryDate') {
+      formattedValue = value
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d)/, '$1/$2')
+        .substring(0, 5);
+    }
+
+    // Limit CVV to 3 digits
+    if (name === 'cvv') {
+      formattedValue = value.replace(/\D/g, '').substring(0, 3);
+    }
+
+    // Uppercase card name
+    if (name === 'cardName') {
+      formattedValue = value.toUpperCase();
+    }
+
+    setCardDetails(prev => ({
+      ...prev,
+      [name]: formattedValue
+    }));
+  };
+
+  const handlePaymentMethodChange = (method: 'card' | 'cash') => {
+    setFormData(prev => ({
+      ...prev,
+      paymentMethod: method
+    }));
+  };
+
+  const handleCardPayment = () => {
+    if (!cardDetails.cardNumber || !cardDetails.cardName || !cardDetails.expiryDate || !cardDetails.cvv) {
+      alert('Please fill in all card details');
+      return;
+    }
+    setShowCardModal(false);
+    
+    // Process order directly without creating a synthetic event
+    if (items.length === 0) {
+      alert('Cart is empty!');
+      return;
+    }
+
+    // Validate guest info if in guest mode
+    if (isGuestMode) {
+      if (!formData.customerName || !formData.customerPhone) {
+        alert('Please enter your name and phone number');
+        return;
+      }
+    }
+    
+    // Generate order number and store in session
+    const orderNumber = `ORD-${Date.now()}`;
+    if (isGuestMode) {
+      sessionStorage.setItem('guestOrderNumber', orderNumber);
+      sessionStorage.setItem('guestOrderData', JSON.stringify({
+        orderNumber,
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        items,
+        total: cartTotal + 200,
+        orderType: formData.orderType,
+        tableNumber: formData.tableNumber,
+        timestamp: new Date().toISOString()
+      }));
+    }
+    
+    // Simulate order placement
+    console.log('Order placed:', { ...formData, items, total: cartTotal, orderNumber });
+    setOrderPlaced(true);
+    clearCart();
+    
+    setTimeout(() => {
+      setOrderPlaced(false);
+      navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
+    }, 3000);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
       alert('Cart is empty!');
       return;
     }
+
+    // Validate guest info if in guest mode
+    if (isGuestMode) {
+      if (!formData.customerName || !formData.customerPhone) {
+        alert('Please enter your name and phone number');
+        return;
+      }
+    }
+
+    // If card payment selected, show card modal
+    if (formData.paymentMethod === 'card' && !showCardModal) {
+      setShowCardModal(true);
+      return;
+    }
+    
+    // Generate order number and store in session
+    const orderNumber = `ORD-${Date.now()}`;
+    if (isGuestMode) {
+      sessionStorage.setItem('guestOrderNumber', orderNumber);
+      sessionStorage.setItem('guestOrderData', JSON.stringify({
+        orderNumber,
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        items,
+        total: cartTotal + 200,
+        orderType: formData.orderType,
+        tableNumber: formData.tableNumber,
+        timestamp: new Date().toISOString()
+      }));
+    }
     
     // Simulate order placement
-    console.log('Order placed:', { ...formData, items, total: cartTotal });
+    console.log('Order placed:', { ...formData, items, total: cartTotal, orderNumber });
     setOrderPlaced(true);
     clearCart();
     
     setTimeout(() => {
       setOrderPlaced(false);
-    }, 5000);
+      navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
+    }, 3000);
   };
 
   if (orderPlaced) {
@@ -63,30 +210,54 @@ const Checkout: React.FC = () => {
           <h1>🛒 Checkout</h1>
 
           <form onSubmit={handleSubmit} className="checkout-form">
+            {/* Guest Information (if guest mode) */}
+            {isGuestMode && (
+              <section className="form-section">
+                <h2>👤 Your Information</h2>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="customerName"
+                    placeholder="Enter your name *"
+                    value={formData.customerName || ''}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="tel"
+                    name="customerPhone"
+                    placeholder="Enter your phone number *"
+                    value={formData.customerPhone || ''}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <p className="guest-note">📱 We'll use this to notify you when your order is ready</p>
+              </section>
+            )}
+
             {/* Order Type Section */}
             <section className="form-section">
               <h2>Order Type</h2>
-              <div className="form-group">
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="orderType"
-                    value="dine-in"
-                    checked={formData.orderType === 'dine-in'}
-                    onChange={handleInputChange}
-                  />
-                  <span>🍽️ Dine-In</span>
-                </label>
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="orderType"
-                    value="takeaway"
-                    checked={formData.orderType === 'takeaway'}
-                    onChange={handleInputChange}
-                  />
-                  <span>🛍️ Takeaway</span>
-                </label>
+              <div className="order-type-tags">
+                <div 
+                  className={`order-tag ${formData.orderType === 'dine-in' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'dine-in' }))}
+                >
+                  <span className="tag-icon">🍽️</span>
+                  <span className="tag-text">Dine-In</span>
+                </div>
+                <div 
+                  className={`order-tag ${formData.orderType === 'takeaway' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'takeaway' }))}
+                >
+                  <span className="tag-icon">🛍️</span>
+                  <span className="tag-text">Takeaway</span>
+                </div>
               </div>
             </section>
 
@@ -101,7 +272,7 @@ const Checkout: React.FC = () => {
                   value={formData.tableNumber || ''}
                   onChange={handleInputChange}
                   className="form-input"
-                  min="1"
+                  required
                 />
               </section>
             )}
@@ -109,33 +280,29 @@ const Checkout: React.FC = () => {
             {/* Payment Method Section */}
             <section className="form-section">
               <h2>Payment Method</h2>
-              <div className="form-group">
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cash"
-                    checked={formData.paymentMethod === 'cash'}
-                    onChange={handleInputChange}
-                  />
-                  <span>💵 Cash</span>
-                </label>
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="online"
-                    checked={formData.paymentMethod === 'online'}
-                    onChange={handleInputChange}
-                  />
-                  <span>💳 Online Payment</span>
-                </label>
+              <div className="payment-methods">
+                <div 
+                  className={`payment-option ${formData.paymentMethod === 'card' ? 'active' : ''}`}
+                  onClick={() => handlePaymentMethodChange('card')}
+                >
+                  <div className="payment-icon">💳</div>
+                  <h3>Card Payment</h3>
+                  <p>Pay with Credit/Debit Card</p>
+                </div>
+                <div 
+                  className={`payment-option ${formData.paymentMethod === 'cash' ? 'active' : ''}`}
+                  onClick={() => handlePaymentMethodChange('cash')}
+                >
+                  <div className="payment-icon">💵</div>
+                  <h3>Cash on Table</h3>
+                  <p>Pay when order arrives</p>
+                </div>
               </div>
             </section>
 
-            {/* Special Notes Section */}
+            {/* Special Notes */}
             <section className="form-section">
-              <h2>Special Notes</h2>
+              <h2>Special Notes (Optional)</h2>
               <textarea
                 name="specialNotes"
                 placeholder="Any special requests or dietary requirements?"
@@ -146,30 +313,139 @@ const Checkout: React.FC = () => {
               />
             </section>
 
-            <button type="submit" className="checkout-btn">
-              Place Order - LKR {cartTotal.toFixed(2)}
+            {/* Order Summary */}
+            <div className="checkout-summary-inline">
+              <div className="summary-row">
+                <span>Items ({items.length})</span>
+                <span>LKR {cartTotal.toFixed(2)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Delivery Fee</span>
+                <span>LKR 200.00</span>
+              </div>
+              <div className="summary-divider"></div>
+              <div className="summary-total">
+                <span>Total</span>
+                <span>LKR {(cartTotal + 200).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button type="submit" className="place-order-btn">
+              {formData.paymentMethod === 'card' ? '💳 Proceed to Payment' : '✅ Place Order'}
             </button>
           </form>
         </div>
-
-        {/* Order Summary Sidebar */}
-        <aside className="order-summary">
-          <h2>Order Summary</h2>
-          <div className="summary-items">
-            {items.map((item, idx) => (
-              <div key={idx} className="summary-item">
-                <span className="item-name">{item.name}</span>
-                <span className="item-qty">× {item.quantity}</span>
-                <span className="item-price">LKR {item.itemTotal.toFixed(2)}</span>
-              </div>
-            ))}
-          </div>
-          <div className="summary-total">
-            <span>Total</span>
-            <span>LKR {cartTotal.toFixed(2)}</span>
-          </div>
-        </aside>
       </div>
+
+      {/* Card Payment Modal */}
+      {showCardModal && (
+        <div className="card-modal-overlay" onClick={() => setShowCardModal(false)}>
+          <div className="card-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="card-modal-header">
+              <h2>💳 Card Payment</h2>
+              <button className="close-btn" onClick={() => setShowCardModal(false)}>✕</button>
+            </div>
+
+            <div className="card-modal-content">
+              {/* Interactive Card Visual */}
+              <div className="credit-card">
+                <div className="card-background">
+                  <div className="card-chip"></div>
+                  <div className="card-number">
+                    {cardDetails.cardNumber || '#### #### #### ####'}
+                  </div>
+                  <div className="card-details">
+                    <div className="card-holder">
+                      <div className="card-label">Card Holder</div>
+                      <div className="card-name">
+                        {cardDetails.cardName || 'YOUR NAME'}
+                      </div>
+                    </div>
+                    <div className="card-expiry">
+                      <div className="card-label">Expires</div>
+                      <div className="card-date">
+                        {cardDetails.expiryDate || 'MM/YY'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card-logo">VISA</div>
+                </div>
+              </div>
+
+              {/* Card Input Form */}
+              <div className="card-form">
+                <div className="form-group">
+                  <label>Card Number</label>
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    placeholder="1234 5678 9012 3456"
+                    value={cardDetails.cardNumber}
+                    onChange={handleCardInputChange}
+                    className="card-input"
+                    maxLength={19}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Card Holder Name</label>
+                  <input
+                    type="text"
+                    name="cardName"
+                    placeholder="JOHN DOE"
+                    value={cardDetails.cardName}
+                    onChange={handleCardInputChange}
+                    className="card-input"
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Expiry Date</label>
+                    <input
+                      type="text"
+                      name="expiryDate"
+                      placeholder="MM/YY"
+                      value={cardDetails.expiryDate}
+                      onChange={handleCardInputChange}
+                      className="card-input"
+                      maxLength={5}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>CVV</label>
+                    <input
+                      type="text"
+                      name="cvv"
+                      placeholder="123"
+                      value={cardDetails.cvv}
+                      onChange={handleCardInputChange}
+                      className="card-input"
+                      maxLength={3}
+                    />
+                  </div>
+                </div>
+
+                <div className="payment-summary">
+                  <div className="payment-amount">
+                    <span>Amount to Pay</span>
+                    <span className="amount">LKR {(cartTotal + 200).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <button 
+                  type="button" 
+                  className="pay-now-btn"
+                  onClick={handleCardPayment}
+                >
+                  💳 Pay Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,217 +1,17 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import axios from 'axios'
-import MenuItem from '../../components/MenuItem'
-import CategoryFilter from '../../components/CategoryFilter'
-import { useCart } from '../../context/CartContext'
-import type { CartItem } from '../../context/CartContext'
-import '../../styles/Menu.css'
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import MenuItem from "../src/models/MenuItem.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
 
-interface CustomizationGroup {
-  id: string
-  name: string
-  type: 'addons' | 'single_select'
-  isRequired: boolean
-  options: Array<{ id: string; name: string; price: number }>
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-interface MenuItemData {
-  id: string
-  name: string
-  description: string
-  basePrice: number
-  image: string
-  category: string
-  isVegetarian: boolean
-  customizationGroups: CustomizationGroup[]
-}
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
-export default function Menu() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const isGuestMode = location.pathname.includes('/guest')
-  
-  const [menuItems, setMenuItems] = useState<MenuItemData[]>([])
-  const [filteredItems, setFilteredItems] = useState<MenuItemData[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const groupByType = true
-  const { addToCart, cartTotal, cartItemCount } = useCart()
-
-  const handleCartClick = () => {
-    navigate(isGuestMode ? '/guest/cart' : '/customer/cart')
-  }
-
-  // Fetch menu items from API
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-      try {
-        setLoading(true)
-        const response = await axios.get(`${API_BASE_URL}/menu/items?limit=100`)
-        setMenuItems(response.data.data || [])
-        setError('')
-      } catch (err) {
-        console.error('Error fetching menu items:', err)
-        setError('Failed to load menu. Using demo data.')
-        setMenuItems(getDemoMenuItems())
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMenuItems()
-  }, [])
-
-  // Filter items based on category and search
-  useEffect(() => {
-    let filtered = menuItems
-
-    if (selectedCategory) {
-      filtered = filtered.filter(item => item.category === selectedCategory)
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        item =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-
-    setFilteredItems(filtered)
-  }, [menuItems, selectedCategory, searchQuery])
-
-  const categories = useMemo(() => 
-    [...new Set(menuItems.map(item => item.category))],
-    [menuItems]
-  )
-
-  // Group items by category/type
-  const groupedItems = useMemo(() => {
-    const groups = filteredItems.reduce((groups, item) => {
-      const category = item.category
-      if (!groups[category]) {
-        groups[category] = []
-      }
-      groups[category].push(item)
-      return groups
-    }, {} as Record<string, MenuItemData[]>)
-    
-    // Sort categories in specific order
-    const categoryOrder = ['Main Dishes', 'Beverages', 'Desserts', 'Sides', 'Specials']
-    const sortedGroups: Record<string, MenuItemData[]> = {}
-    
-    categoryOrder.forEach(category => {
-      if (groups[category]) {
-        sortedGroups[category] = groups[category]
-      }
-    })
-    
-    // Add any remaining categories not in the order
-    Object.keys(groups).forEach(category => {
-      if (!sortedGroups[category]) {
-        sortedGroups[category] = groups[category]
-      }
-    })
-    
-    return sortedGroups
-  }, [filteredItems])
-
-  const handleAddToCart = useCallback((itemDetails: CartItem) => {
-    addToCart(itemDetails)
-    alert(`${itemDetails.name} added to cart!`)
-  }, [addToCart])
-
-  return (
-    <>
-      <div className="menu-page">
-      <div className="menu-header">
-        <div className="header-content">
-          <h1>🍽️ Our Menu</h1>
-          <p className="subtitle">Explore our delicious offerings</p>
-        </div>
-        <div className="cart-indicator" onClick={handleCartClick}>
-          <span className="cart-icon">🛒</span>
-          <div className="cart-info">
-            <span className="cart-count">{cartItemCount}</span>
-            <span className="cart-total">LKR {cartTotal.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      {loading ? (
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Loading menu items...</p>
-        </div>
-      ) : (
-        <div className="menu-container">
-          {filteredItems.length > 0 ? (
-            groupByType ? (
-              // Grouped by category/type
-              <div className="menu-grouped">
-                {Object.entries(groupedItems).map(([category, items]) => (
-                  <div key={category} className="category-section">
-                    <div className="category-header">
-                      <h2 className="category-title">{category}</h2>
-                      <span className="category-count">{items.length} items</span>
-                    </div>
-                    <div className="menu-grid">
-                      {items.map(item => (
-                        <MenuItem
-                          key={item.id || item._id}
-                          {...item}
-                          id={item.id || item._id}
-                          onAddToCart={handleAddToCart}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              // Ungrouped view
-              <div className="menu-grid">
-                {filteredItems.map(item => (
-                  <MenuItem
-                    key={item.id || item._id}
-                    {...item}
-                    id={item.id || item._id}
-                    onAddToCart={handleAddToCart}
-                  />
-                ))}
-              </div>
-            )
-          ) : (
-            <div className="no-items">
-              <p>📭 No menu items found</p>
-              <p className="no-items-subtitle">Try adjusting your search or filters</p>
-            </div>
-          )}
-        </div>
-      )}
-      </div>
-    </>
-  )
-}
-
-// Demo data for testing
-function getDemoMenuItems(): MenuItemData[] {
-  return [
+const sampleData = [
     // MAIN DISHES
     {
       id: "burger",
@@ -637,5 +437,37 @@ function getDemoMenuItems(): MenuItemData[] {
         }
       ]
     }
-  ]
-}
+  ];
+
+  const importData = async () => {
+    try {
+      console.log("Connecting to MongoDB...");
+      await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
+      console.log("✓ Connected to MongoDB");
+      
+      // Clear existing data
+      const deleteResult = await MenuItem.deleteMany();
+      console.log(`✓ Cleared ${deleteResult.deletedCount} existing menu items`);
+      
+      // Insert sample data
+      const items = await MenuItem.insertMany(sampleData);
+      console.log(`✓ Successfully imported ${items.length} menu items`);
+      
+      // Display summary
+      console.log("\n📊 Summary:");
+      console.log(`   - Burgers: ${items.filter(i => i.category === "Burgers").length}`);
+      console.log(`   - Hot Dogs: ${items.filter(i => i.category === "Hot Dogs").length}`);
+      console.log(`   - Drinks: ${items.filter(i => i.category === "Drinks").length}`);
+      console.log(`   - Desserts: ${items.filter(i => i.category === "Desserts").length}`);
+      console.log(`   - Sides: ${items.filter(i => i.category === "Sides").length}`);
+      
+      console.log("\n✅ Database seeded successfully!");
+      process.exit(0);
+    } catch (error) {
+      console.error("❌ Error importing data:", error.message);
+      process.exit(1);
+    }
+  };
+
+  // Run the import
+  importData();
