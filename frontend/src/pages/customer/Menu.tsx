@@ -217,7 +217,7 @@ export default function Menu() {
                         <MenuItem
                           key={item.id || item._id}
                           {...item}
-                          id={item.id || item._id}
+                          id={(item.id || item._id) as string}
                           onAddToCart={handleAddToCart}
                         />
                       ))}
@@ -232,7 +232,7 @@ export default function Menu() {
                   <MenuItem
                     key={item.id || item._id}
                     {...item}
-                    id={item.id || item._id}
+                    id={(item.id || item._id) as string}
                     onAddToCart={handleAddToCart}
                   />
                 ))}

@@ -26,7 +26,7 @@ const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartTotal, items, clearCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const isGuestMode = location.pathname.includes('/guest');
   
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -38,8 +38,6 @@ const Checkout: React.FC = () => {
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showCardModal, setShowCardModal] = useState(false);
   const [cardDetails, setCardDetails] = useState<CardDetails>({
     cardNumber: '',
@@ -125,11 +123,7 @@ const Checkout: React.FC = () => {
       }
     }
 
-    setLoading(true);
-    setError('');
-    
     try {
-      const deliveryFee = formData.orderType === 'takeaway' ? 200 : 0;
       
       // Prepare order data
       const orderData = {
@@ -172,12 +166,10 @@ const Checkout: React.FC = () => {
           state: { orderId: order._id }
         });
       }, 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Order creation failed:', err);
-      setError(err.response?.data?.error || 'Failed to place order. Please try again.');
-      alert('Failed to place order: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setLoading(false);
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      alert('Failed to place order: ' + (error.response?.data?.error || error.message || 'Unknown error'));
     }
   };
 
