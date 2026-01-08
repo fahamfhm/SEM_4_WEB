@@ -189,8 +189,9 @@ const CustomerProfile: React.FC = () => {
           {isEditing ? (
             <form className="cust-profile-form" onSubmit={handleEditSubmit}>
               <div className="cust-profile-form-group">
-                <label>Full Name *</label>
+                <label htmlFor="edit-name">Full Name *</label>
                 <input
+                  id="edit-name"
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
@@ -200,8 +201,9 @@ const CustomerProfile: React.FC = () => {
               </div>
 
               <div className="cust-profile-form-group">
-                <label>Email Address</label>
+                <label htmlFor="edit-email">Email Address</label>
                 <input
+                  id="edit-email"
                   type="email"
                   value={editForm.email}
                   disabled
@@ -211,8 +213,9 @@ const CustomerProfile: React.FC = () => {
               </div>
 
               <div className="cust-profile-form-group">
-                <label>Phone Number</label>
+                <label htmlFor="edit-phone">Phone Number</label>
                 <input
+                  id="edit-phone"
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
@@ -276,8 +279,9 @@ const CustomerProfile: React.FC = () => {
           {isChangingPassword ? (
             <form className="cust-profile-form" onSubmit={handlePasswordSubmit}>
               <div className="cust-profile-form-group">
-                <label>Current Password *</label>
+                <label htmlFor="current-password">Current Password *</label>
                 <input
+                  id="current-password"
                   type="password"
                   value={passwordForm.currentPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
@@ -288,8 +292,9 @@ const CustomerProfile: React.FC = () => {
               </div>
 
               <div className="cust-profile-form-group">
-                <label>New Password *</label>
+                <label htmlFor="new-password">New Password *</label>
                 <input
+                  id="new-password"
                   type="password"
                   value={passwordForm.newPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
@@ -301,8 +306,9 @@ const CustomerProfile: React.FC = () => {
               </div>
 
               <div className="cust-profile-form-group">
-                <label>Confirm New Password *</label>
+                <label htmlFor="confirm-password">Confirm New Password *</label>
                 <input
+                  id="confirm-password"
                   type="password"
                   value={passwordForm.confirmPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
