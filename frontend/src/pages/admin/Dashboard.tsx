@@ -63,9 +63,8 @@ const AdminDashboard: React.FC = () => {
       setError(null);
 
       // Fetch all data in parallel
-      const [ordersRes, usersRes, menuRes] = await Promise.all([
+      const [ordersRes, menuRes] = await Promise.all([
         api.get('/orders/admin/all'),
-        api.get('/auth/me').catch(() => ({ data: { data: [] } })),
         api.get('/menu/items')
       ]);
 

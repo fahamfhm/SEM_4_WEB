@@ -11,7 +11,7 @@ interface PasswordChangeData {
 }
 
 const CustomerProfile: React.FC = () => {
-  const { user: contextUser, setUser } = useAuth();
+  const { user: contextUser, updateUser } = useAuth();
   const [user, setLocalUser] = useState<User | null>(contextUser);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -76,7 +76,7 @@ const CustomerProfile: React.FC = () => {
       });
       
       setLocalUser(updatedUser);
-      setUser(updatedUser);
+      updateUser({ name: updatedUser.name, phone: updatedUser.phone });
       setIsEditing(false);
       setMessage({ type: 'success', text: '✅ Profile updated successfully!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
@@ -132,15 +132,6 @@ const CustomerProfile: React.FC = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   if (loading && !user) {
