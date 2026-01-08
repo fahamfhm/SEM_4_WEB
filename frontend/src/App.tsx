@@ -5,6 +5,7 @@ import CustomerLayout from "./layout/CustomerLayout";
 import AdminLayout from "./layout/AdminLayout";
 import KitchenLayout from "./layout/KitchenLayout";
 import { TableProvider } from "./context/TableContext";
+import { AuthProvider } from "./context/AuthContext";
 
 //Auth Pages
 import AuthPage from "./pages/auth/AuthPage";
@@ -28,55 +29,55 @@ import Analytics from "./pages/admin/Analytics";
 import KitchenOrders from "./pages/kitchen/Orders";
 import KitchenInventory from "./pages/kitchen/Inventory";
 
-// import KitchenOrders from "./pages/kitchen/Orders";
-
 function App() {
   return (
     <BrowserRouter>
-      <TableProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth">
-              <Route index element={<Navigate to="/auth/login" />} />
-              <Route path="login" element={<AuthPage mode="login" />} />
-              <Route path="register" element={<AuthPage mode="register" />} />
+      <AuthProvider>
+        <TableProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth">
+                <Route index element={<Navigate to="/auth/login" />} />
+                <Route path="login" element={<AuthPage mode="login" />} />
+                <Route path="register" element={<AuthPage mode="register" />} />
+              </Route>
+              {/* Guest Ordering Routes */}
+              <Route path="/guest">
+                <Route path="menu" element={<CustomerMenu />} />
+                <Route path="cart" element={<CustomerCart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="order-tracking" element={<OrderTracking />} />
+              </Route>
             </Route>
-            {/* Guest Ordering Routes */}
-            <Route path="/guest">
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="menu" element={<MenuManagement />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
+
+            {/* Kitchen Routes */}
+            <Route path="/kitchen" element={<KitchenLayout />}>
+              <Route path="orders" element={<KitchenOrders />} />
+              <Route path="inventory" element={<KitchenInventory />} />
+            </Route>
+
+            {/* Customer Routes (Logged In) */}
+            <Route path="/customer" element={<CustomerLayout />}>
               <Route path="menu" element={<CustomerMenu />} />
+              <Route path="profile" element={<CustomerProfile />} />
               <Route path="cart" element={<CustomerCart />} />
-              <Route path="checkout" element={<Checkout />} />
+              <Route path="orders" element={<OrderHistory />} />
               <Route path="order-tracking" element={<OrderTracking />} />
+              <Route path="checkout" element={<Checkout />} />
             </Route>
-          </Route>
-
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="menu" element={<MenuManagement />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="analytics" element={<Analytics />} />
-          </Route>
-
-          {/* Kitchen Routes */}
-          <Route path="/kitchen" element={<KitchenLayout />}>
-            <Route path="orders" element={<KitchenOrders />} />
-            <Route path="inventory" element={<KitchenInventory />} />
-          </Route>
-
-          {/* Customer Routes (Logged In) */}
-          <Route path="/customer" element={<CustomerLayout />}>
-            <Route path="menu" element={<CustomerMenu />} />
-            <Route path="profile" element={<CustomerProfile />} />
-            <Route path="cart" element={<CustomerCart />} />
-            <Route path="orders" element={<OrderHistory />} />
-            <Route path="order-tracking" element={<OrderTracking />} />
-            <Route path="checkout" element={<Checkout />} />
-          </Route>
-        </Routes>
-      </TableProvider>
+          </Routes>
+        </TableProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -2,7 +2,6 @@
 .navbar {
   background-color: var(--bg-lighter);
   box-shadow: var(--shadow-md);
-  /* padding: var(--space-md) var(--space-lg); */
   display: flex;
   justify-content: center;
   align-items: center;

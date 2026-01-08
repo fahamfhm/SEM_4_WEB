@@ -2,7 +2,7 @@
 
 /* Cart Page */
 .cart-page {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh);
   padding: var(--space-2xl) var(--space-lg);
   background: linear-gradient(135deg, var(--bg-lighter) 0%, var(--bg-light) 100%);
 }

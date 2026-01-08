@@ -2,7 +2,7 @@
 
 /* Menu Page Container */
 .menu-page {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh);
   background: linear-gradient(135deg, var(--bg-lighter) 0%, var(--bg-light) 100%);
   padding: var(--space-2xl) var(--space-lg);
   transition: background-color var(--transition-base);
@@ -53,6 +53,70 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-medium);
   margin: 0;
+}
+
+/* Menu Actions Container */
+.menu-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* Action Indicators (Profile, Orders) */
+.action-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: white;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--lighter-gray);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.action-indicator:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.action-icon {
+  font-size: 1.8rem;
+  filter: grayscale(0);
+}
+
+.action-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.action-label {
+  font-weight: var(--font-bold);
+  color: var(--dark);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-name {
+  font-weight: var(--font-semibold);
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.action-sublabel {
+  font-weight: var(--font-medium);
+  color: var(--gray);
+  font-size: var(--font-size-sm);
 }
 
 /* Cart Indicator */

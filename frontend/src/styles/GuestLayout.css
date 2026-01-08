@@ -6,13 +6,6 @@
   flex-direction: column;
 }
 
-.guest-layout nav {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  box-shadow: var(--shadow-lg);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-}
 
 .guest-content {
   flex: 1;

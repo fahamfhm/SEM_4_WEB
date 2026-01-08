@@ -4,6 +4,7 @@ import axios from 'axios'
 import MenuItem from '../../components/MenuItem'
 import CategoryFilter from '../../components/CategoryFilter'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
 import type { CartItem } from '../../context/CartContext'
 import '../../styles/Menu.css'
 
@@ -32,6 +33,7 @@ export default function Menu() {
   const navigate = useNavigate()
   const location = useLocation()
   const isGuestMode = location.pathname.includes('/guest')
+  const { user, isAuthenticated } = useAuth()
   
   const [menuItems, setMenuItems] = useState<MenuItemData[]>([])
   const [filteredItems, setFilteredItems] = useState<MenuItemData[]>([])
@@ -44,6 +46,14 @@ export default function Menu() {
 
   const handleCartClick = () => {
     navigate(isGuestMode ? '/guest/cart' : '/customer/cart')
+  }
+
+  const handleProfileClick = () => {
+    navigate('/customer/profile')
+  }
+
+  const handleOrdersClick = () => {
+    navigate('/customer/order-history')
   }
 
   // Fetch menu items from API
@@ -134,11 +144,31 @@ export default function Menu() {
           <h1>🍽️ Our Menu</h1>
           <p className="subtitle">Explore our delicious offerings</p>
         </div>
-        <div className="cart-indicator" onClick={handleCartClick}>
-          <span className="cart-icon">🛒</span>
-          <div className="cart-info">
-            <span className="cart-count">{cartItemCount}</span>
-            <span className="cart-total">LKR {cartTotal.toFixed(2)}</span>
+        <div className="menu-actions">
+          {isAuthenticated && !isGuestMode && (
+            <>
+              <div className="action-indicator" onClick={handleProfileClick}>
+                <span className="action-icon">👤</span>
+                <div className="action-info">
+                  <span className="action-label">Profile</span>
+                  <span className="action-name">{user?.name || 'User'}</span>
+                </div>
+              </div>
+              <div className="action-indicator" onClick={handleOrdersClick}>
+                <span className="action-icon">📦</span>
+                <div className="action-info">
+                  <span className="action-label">My Orders</span>
+                  <span className="action-sublabel">View History</span>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="cart-indicator" onClick={handleCartClick}>
+            <span className="cart-icon">🛒</span>
+            <div className="cart-info">
+              <span className="cart-count">{cartItemCount}</span>
+              <span className="cart-total">LKR {cartTotal.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>
