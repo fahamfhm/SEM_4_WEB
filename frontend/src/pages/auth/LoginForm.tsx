@@ -50,9 +50,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggle }) => {
       } else {
         navigate('/customer/menu');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : 'Failed to login. Please check your credentials.';
+      setError(errorMessage || 'Failed to login. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

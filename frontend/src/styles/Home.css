@@ -1,5 +1,10 @@
 /* ===== HOME PAGE - PROFESSIONAL DESIGN SYSTEM ===== */
 
+/* Global Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Root Container with Gradient Background */
 .home-root {
   position: relative;
@@ -12,6 +17,8 @@
   overflow-x: hidden;
   background: url(../../public/wood-board.jpeg);
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Decorative Overlay */
@@ -343,6 +350,131 @@
   0%, 100% {
     transform: scale(1);
     box-shadow: var(--shadow-xl);
+
+/* ================================
+   User Info Badge & Enhanced Styling
+   ================================ */
+
+/* User Info Badge */
+.home-user-info {
+  margin-bottom: 2rem;
+  animation: home-fade-slide 0.6s ease-out;
+}
+
+.home-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+              0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  backdrop-filter: blur(10px);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-user-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.home-user-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+}
+
+.home-user-badge:hover::before {
+  opacity: 1;
+}
+
+.home-user-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  animation: home-icon-gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes home-icon-gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+}
+
+.home-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.home-user-name {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.home-user-role {
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ef4444 0%, #ea580c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Table Number Badge */
+.home-chip-table {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%) !important;
+  border: 2px solid rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+  animation: home-glow-pulse 2s ease-in-out infinite !important;
+}
+
+/* Enhanced Logout Button */
+.home-btn-logout {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-btn-logout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+}
+
+.home-btn-logout:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* ================================
+   End User Info Badge
+   ================================ */
   }
   50% {
     transform: scale(1.05);
@@ -524,6 +656,25 @@
     min-height: 48px; /* Touch-friendly */
   }
 
+  /* User badge responsive */
+  .home-user-badge {
+    padding: 0.875rem 1.25rem;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .home-user-icon {
+    font-size: 1.75rem;
+  }
+
+  .home-user-name {
+    font-size: 1rem;
+  }
+
+  .home-user-role {
+    font-size: 0.8125rem;
+  }
+
   .home-card {
     width: min(380px, 88vw);
   }
@@ -562,6 +713,25 @@
   .home-badges {
     justify-content: center;
     gap: var(--space-sm);
+  }
+
+  /* User badge mobile */
+  .home-user-badge {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    max-width: 300px;
+  }
+
+  .home-user-icon {
+    font-size: 1.5rem;
+  }
+
+  .home-user-name {
+    font-size: 0.9375rem;
+  }
+
+  .home-user-role {
+    font-size: 0.75rem;
   }
 
   .home-card {

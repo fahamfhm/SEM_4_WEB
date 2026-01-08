@@ -9,7 +9,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tableNumber, diningType, setTableInfo } = useTable();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Check for table parameter in URL when component mounts
   useEffect(() => {
@@ -47,6 +47,21 @@ const Home = () => {
       navigate('/customer/menu');
     }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin': return '👑';
+      case 'kitchen': return '🍳';
+      case 'customer': return '👤';
+      default: return '👤';
+    }
+  };
+
   return (
     <div className="home-root">
       {/* vignette over wooden background */}
@@ -90,20 +105,42 @@ const Home = () => {
                 just the way you crave.
               </p>
 
+              {/* User Info Badge */}
+              {isAuthenticated && user && (
+                <div className="home-user-info">
+                  <div className="home-user-badge">
+                    <span className="home-user-icon">{getRoleIcon(user.role)}</span>
+                    <div className="home-user-details">
+                      <span className="home-user-name">{user.name}</span>
+                      <span className="home-user-role">{user.role}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="home-actions">
                 {isAuthenticated && user ? (
                   <>
                     <button
                       className="fc-primary-btn home-btn home-btn-glow"
                       onClick={handleContinueAsUser}
+                      aria-label={`Continue to ${user.role} dashboard`}
                     >
-                      👋 Continue as {user.name}
+                      ✨ Go to Dashboard
                     </button>
                     <button
                       className="fc-secondary-btn home-btn home-btn-outline"
                       onClick={handleGuestOrderClick}
+                      aria-label="Order as guest without logging in"
                     >
                       🍔 Order as Guest
+                    </button>
+                    <button
+                      className="home-btn home-btn-logout"
+                      onClick={handleLogout}
+                      aria-label="Logout from your account"
+                    >
+                      🚪 Logout
                     </button>
                   </>
                 ) : (
@@ -111,12 +148,14 @@ const Home = () => {
                     <button
                       className="fc-primary-btn home-btn home-btn-glow"
                       onClick={handleGuestOrderClick}
+                      aria-label="Start ordering as guest"
                     >
                       🍔 Order as Guest
                     </button>
                     <button
                       className="fc-secondary-btn home-btn home-btn-outline"
                       onClick={HandleLoginClick}
+                      aria-label="Sign in or create account"
                     >
                       👤 Sign In / Register
                     </button>
@@ -125,12 +164,17 @@ const Home = () => {
               </div>
 
               <div className="home-badges">
-                <span className="fc-chip">
-                  <span className="home-dot-live" /> No account needed
+                <span className="fc-chip" role="status" aria-label="No account needed">
+                  <span className="home-dot-live" aria-hidden="true" /> No account needed
                 </span>
-                <span className="fc-chip">
-                  <span>✨</span> Quick & Easy ordering
+                <span className="fc-chip" aria-label="Quick and easy ordering">
+                  <span aria-hidden="true">✨</span> Quick & Easy ordering
                 </span>
+                {diningType === 'table' && tableNumber && (
+                  <span className="fc-chip home-chip-table" aria-label={`Dining at table ${tableNumber}`}>
+                    <span aria-hidden="true">🪑</span> Table {tableNumber}
+                  </span>
+                )}
               </div>
             </div>
           </div>
