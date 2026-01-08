@@ -7,6 +7,56 @@
 - Node.js v18+ on production server
 - Docker (optional, for containerization)
 - GitHub for CI/CD
+- Vercel account for hosting
+
+---
+
+## 🌐 Quick Deployment to Vercel
+
+### Frontend Deployment
+
+1. **Connect Repository to Vercel:**
+   - Go to [Vercel Dashboard](https://vercel.com)
+   - Click "Import Project"
+   - Select your GitHub repository
+   - Set Root Directory to `frontend`
+
+2. **Configure Environment Variables:**
+   ```
+   VITE_API_URL=https://your-backend-url.vercel.app/api
+   ```
+
+3. **Build Settings:**
+   - Framework Preset: Vite
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+
+### Backend Deployment
+
+1. **Configure for Vercel:**
+   - Create `vercel.json` in backend directory (if not exists)
+   - Set Root Directory to `backend`
+
+2. **Environment Variables in Vercel:**
+   ```
+   NODE_ENV=production
+   PORT=5000
+   MONGODB_URI=your-mongodb-connection-string
+   JWT_SECRET=your-jwt-secret
+   JWT_EXPIRE=7d
+   FRONTEND_URL=https://your-frontend.vercel.app
+   ```
+
+3. **Important:** After deploying backend, update frontend's `VITE_API_URL` with the backend URL
+
+### CORS Configuration
+
+The backend is configured to accept requests from:
+- `http://localhost:5173` (local development)
+- `https://food-court-sem4.vercel.app` (production frontend)
+- Any URL set in `FRONTEND_URL` environment variable
+
+If you deploy to a different domain, update the `allowedOrigins` array in `backend/src/app.js`.
 
 ---
 
