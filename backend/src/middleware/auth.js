@@ -63,3 +63,42 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+// Optional authentication - doesn't fail if no token
+export const optionalAuth = async (req, res, next) => {
+  let token;
+
+  // Check for token in headers
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  // Check for token in cookies
+  else if (req.cookies.token) {
+    token = req.cookies.token;
+  }
+
+  // If no token, just continue without setting req.user
+  if (!token) {
+    return next();
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-secret-key-change-in-production"
+    );
+
+    // Get user from token
+    req.user = await User.findById(decoded.id);
+
+    next();
+  } catch (error) {
+    // Token is invalid but we don't fail the request
+    // Just continue without req.user
+    next();
+  }
+};

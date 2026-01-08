@@ -5,6 +5,7 @@ import MenuItem from '../../components/MenuItem'
 import CategoryFilter from '../../components/CategoryFilter'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
+import OrderService from '../../services/orderService'
 import type { CartItem } from '../../context/CartContext'
 import '../../styles/Menu.css'
 
@@ -34,6 +35,7 @@ export default function Menu() {
   const location = useLocation()
   const isGuestMode = location.pathname.includes('/guest')
   const { user, isAuthenticated } = useAuth()
+  const hasGuestSession = OrderService.hasGuestSession()
   
   const [menuItems, setMenuItems] = useState<MenuItemData[]>([])
   const [filteredItems, setFilteredItems] = useState<MenuItemData[]>([])
@@ -145,7 +147,7 @@ export default function Menu() {
           <p className="subtitle">Explore our delicious offerings</p>
         </div>
         <div className="menu-actions">
-          {isAuthenticated && !isGuestMode && (
+          {(isAuthenticated && !isGuestMode) && (
             <>
               <div className="action-indicator" onClick={handleProfileClick}>
                 <span className="action-icon">👤</span>
@@ -162,6 +164,15 @@ export default function Menu() {
                 </div>
               </div>
             </>
+          )}
+          {(isGuestMode && hasGuestSession) && (
+            <div className="action-indicator" onClick={handleOrdersClick}>
+              <span className="action-icon">📦</span>
+              <div className="action-info">
+                <span className="action-label">My Orders</span>
+                <span className="action-sublabel">Session Orders</span>
+              </div>
+            </div>
           )}
           <div className="cart-indicator" onClick={handleCartClick}>
             <span className="cart-icon">🛒</span>

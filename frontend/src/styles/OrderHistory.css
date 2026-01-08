@@ -32,6 +32,19 @@
   font-size: var(--font-size-lg);
 }
 
+.guest-session-notice {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff4cc 100%);
+  color: #856404;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 2px solid #ffc107;
+  margin-top: var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-medium);
+  text-align: center;
+  animation: slideDown 0.5s ease-out;
+}
+
 .orders-list {
   display: flex;
   flex-direction: column;

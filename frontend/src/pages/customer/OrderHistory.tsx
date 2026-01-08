@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 import '../../styles/OrderHistory.css';
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  date: string;
-  total: number;
-  status: 'pending' | 'accepted' | 'preparing' | 'ready' | 'delivered';
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-}
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { useAuth } from '../../context/AuthContext';
+import OrderService, { type Order } from '../../services/orderService';
 
 const OrderHistory: React.FC = () => {
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const isGuestMode = location.pathname.includes('/guest');
+  
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,43 +17,31 @@ const OrderHistory: React.FC = () => {
     const fetchOrderHistory = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/orders/history`);
-        setOrders(response.data.data || []);
+        
+        // Get orders based on authentication status
+        let fetchedOrders: Order[];
+        if (isAuthenticated && !isGuestMode) {
+          // Fetch authenticated user's orders
+          fetchedOrders = await OrderService.getOrders();
+        } else {
+          // Fetch guest orders using session ID
+          const guestSessionId = OrderService.getGuestSessionId();
+          fetchedOrders = await OrderService.getOrders(guestSessionId);
+        }
+        
+        setOrders(fetchedOrders);
         setError('');
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching order history:', err);
-        setError('Failed to load order history');
-        // Demo data
-        setOrders([
-          {
-            id: '1',
-            orderNumber: '#ORD-001',
-            date: '2025-01-02',
-            total: 1250,
-            status: 'delivered',
-            items: [
-              { name: 'Classic Burger', quantity: 2, price: 450 },
-              { name: 'Fried Chicken', quantity: 1, price: 350 }
-            ]
-          },
-          {
-            id: '2',
-            orderNumber: '#ORD-002',
-            date: '2025-01-01',
-            total: 890,
-            status: 'delivered',
-            items: [
-              { name: 'Hot Dog Combo', quantity: 1, price: 890 }
-            ]
-          }
-        ]);
+        setError(err.response?.data?.error || 'Failed to load order history');
+        setOrders([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrderHistory();
-  }, []);
+  }, [isAuthenticated, isGuestMode]);
 
   if (loading) return <div className="order-history-loading">Loading order history...</div>;
 
@@ -71,6 +50,11 @@ const OrderHistory: React.FC = () => {
       <div className="order-history-header">
         <h1>📦 Order History</h1>
         <p className="subtitle">View all your past orders</p>
+        {isGuestMode && (
+          <div className="guest-session-notice">
+            🔒 These orders are only visible in this browser session. Create an account to save orders permanently.
+          </div>
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -82,11 +66,15 @@ const OrderHistory: React.FC = () => {
           </div>
         ) : (
           orders.map(order => (
-            <div key={order.id} className="order-card">
+            <div key={order._id} className="order-card">
               <div className="order-header-row">
                 <div className="order-info">
                   <h3>{order.orderNumber}</h3>
-                  <p className="order-date">{new Date(order.date).toLocaleDateString()}</p>
+                  <p className="order-date">{new Date(order.orderedAt).toLocaleDateString()}</p>
+                  <p className="order-type">{order.orderType === 'dine-in' ? 'Dine-In' : 'Takeaway'}</p>
+                  {order.guestInfo && (
+                    <p className="guest-info">Guest: {order.guestInfo.name}</p>
+                  )}
                 </div>
                 <div className="order-status" data-status={order.status}>
                   <span className={`status-badge status-badge--${order.status}`}>
@@ -98,8 +86,9 @@ const OrderHistory: React.FC = () => {
               <div className="order-items-list">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="order-item-row">
-                    <span className="item-name">{item.name} × {item.quantity}</span>
-                    <span className="item-price">LKR {(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-quantity">x{item.quantity}</span>
+                    <span className="item-price">LKR {item.itemTotal.toFixed(2)}</span>
                   </div>
                 ))}
               </div>

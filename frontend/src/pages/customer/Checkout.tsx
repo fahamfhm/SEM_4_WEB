@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../../styles/Checkout.css';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import OrderService from '../../services/orderService';
 
 interface CheckoutFormData {
   orderType: 'dine-in' | 'takeaway';
@@ -24,6 +26,7 @@ const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartTotal, items, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const isGuestMode = location.pathname.includes('/guest');
   
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -34,6 +37,8 @@ const Checkout: React.FC = () => {
     customerPhone: ''
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [showCardModal, setShowCardModal] = useState(false);
   const [cardDetails, setCardDetails] = useState<CardDetails>({
     cardNumber: '',
@@ -94,14 +99,18 @@ const Checkout: React.FC = () => {
     }));
   };
 
-  const handleCardPayment = () => {
+  const handleCardPayment = async () => {
     if (!cardDetails.cardNumber || !cardDetails.cardName || !cardDetails.expiryDate || !cardDetails.cvv) {
       alert('Please fill in all card details');
       return;
     }
     setShowCardModal(false);
     
-    // Process order directly without creating a synthetic event
+    // Process order
+    await processOrder();
+  };
+
+  const processOrder = async () => {
     if (items.length === 0) {
       alert('Cart is empty!');
       return;
@@ -114,35 +123,62 @@ const Checkout: React.FC = () => {
         return;
       }
     }
+
+    setLoading(true);
+    setError('');
     
-    // Generate order number and store in session
-    const orderNumber = `ORD-${Date.now()}`;
-    if (isGuestMode) {
-      sessionStorage.setItem('guestOrderNumber', orderNumber);
-      sessionStorage.setItem('guestOrderData', JSON.stringify({
-        orderNumber,
-        customerName: formData.customerName,
-        customerPhone: formData.customerPhone,
-        items,
-        total: cartTotal + 200,
+    try {
+      const deliveryFee = formData.orderType === 'takeaway' ? 200 : 0;
+      
+      // Prepare order data
+      const orderData = {
+        items: items.map(item => ({
+          menuItemId: item.id,
+          name: item.name,
+          basePrice: item.basePrice,
+          quantity: item.quantity,
+          customizations: item.customizations || {},
+          itemTotal: item.itemTotal || (item.basePrice * item.quantity)
+        })),
         orderType: formData.orderType,
         tableNumber: formData.tableNumber,
-        timestamp: new Date().toISOString()
-      }));
+        paymentMethod: formData.paymentMethod,
+        specialNotes: formData.specialNotes,
+      };
+
+      // Add guest info if guest mode
+      if (isGuestMode || !isAuthenticated) {
+        const guestSessionId = OrderService.getGuestSessionId();
+        Object.assign(orderData, {
+          guestSessionId,
+          guestInfo: {
+            name: formData.customerName || 'Guest',
+            phone: formData.customerPhone || ''
+          }
+        });
+      }
+
+      // Create order in database
+      const order = await OrderService.createOrder(orderData);
+      
+      console.log('Order created:', order);
+      setOrderPlaced(true);
+      clearCart();
+      
+      setTimeout(() => {
+        setOrderPlaced(false);
+        navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
+      }, 3000);
+    } catch (err: any) {
+      console.error('Order creation failed:', err);
+      setError(err.response?.data?.error || 'Failed to place order. Please try again.');
+      alert('Failed to place order: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
     }
-    
-    // Simulate order placement
-    console.log('Order placed:', { ...formData, items, total: cartTotal, orderNumber });
-    setOrderPlaced(true);
-    clearCart();
-    
-    setTimeout(() => {
-      setOrderPlaced(false);
-      navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
-    }, 3000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
       alert('Cart is empty!');
@@ -163,31 +199,8 @@ const Checkout: React.FC = () => {
       return;
     }
     
-    // Generate order number and store in session
-    const orderNumber = `ORD-${Date.now()}`;
-    if (isGuestMode) {
-      sessionStorage.setItem('guestOrderNumber', orderNumber);
-      sessionStorage.setItem('guestOrderData', JSON.stringify({
-        orderNumber,
-        customerName: formData.customerName,
-        customerPhone: formData.customerPhone,
-        items,
-        total: cartTotal + 200,
-        orderType: formData.orderType,
-        tableNumber: formData.tableNumber,
-        timestamp: new Date().toISOString()
-      }));
-    }
-    
-    // Simulate order placement
-    console.log('Order placed:', { ...formData, items, total: cartTotal, orderNumber });
-    setOrderPlaced(true);
-    clearCart();
-    
-    setTimeout(() => {
-      setOrderPlaced(false);
-      navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
-    }, 3000);
+    // Process order
+    await processOrder();
   };
 
   if (orderPlaced) {
