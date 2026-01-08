@@ -132,8 +132,8 @@ const KitchenOrders = () => {
     return (
       <div className="kitchen-orders-container">
         <h2>🍳 Kitchen Orders</h2>
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
-          <p style={{ fontSize: '24px' }}>Loading orders...</p>
+        <div className="loading-state">
+          <p>Loading orders...</p>
         </div>
       </div>
     );
@@ -146,90 +146,48 @@ const KitchenOrders = () => {
 
       {/* Error Banner */}
       {error && (
-        <div style={{
-          background: '#fef2f2',
-          color: '#dc2626',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
+        <div className="error-banner">
           <span>⚠️ {error}</span>
-          <button onClick={fetchOrders} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: 600 }}>
+          <button onClick={fetchOrders} className="error-retry-btn">
             Retry
           </button>
         </div>
       )}
 
       {/* Filter Buttons */}
-      <div className="order-filters" style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+      <div className="order-filters">
         {(['all', 'pending', 'confirmed', 'preparing', 'ready', 'served'] as FilterType[]).map(filter => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '25px',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600,
-              textTransform: 'capitalize',
-              background: activeFilter === filter 
-                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                : '#f3f4f6',
-              color: activeFilter === filter ? 'white' : '#374151',
-              transition: 'all 0.2s ease',
-            }}
+            className={`filter-btn ${activeFilter === filter ? 'filter-btn-active' : ''}`}
           >
             {filter} ({counts[filter]})
           </button>
         ))}
         {/* Refresh Button */}
-        <button
-          onClick={fetchOrders}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '25px',
-            border: 'none',
-            cursor: 'pointer',
-            fontWeight: 600,
-            background: '#e5e7eb',
-            color: '#374151',
-            marginLeft: 'auto',
-          }}
-        >
+        <button onClick={fetchOrders} className="refresh-btn">
           🔄 Refresh
         </button>
       </div>
 
       {/* Orders Grid */}
       {filteredOrders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
-          <p style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</p>
-          <p style={{ fontSize: '18px' }}>No {activeFilter !== 'all' ? activeFilter : ''} orders right now!</p>
+        <div className="empty-state">
+          <p className="empty-icon">🎉</p>
+          <p className="empty-text">No {activeFilter !== 'all' ? activeFilter : ''} orders right now!</p>
         </div>
       ) : (
         <div className="orders-grid">
           {filteredOrders.map(order => (
             <div 
               key={order._id} 
-              className="order-card"
-              style={{ 
-                borderLeftColor: ['pending', 'confirmed'].includes(order.status)
-                  ? '#fbbf24' 
-                  : order.status === 'preparing' 
-                    ? '#f97316' 
-                    : order.status === 'ready'
-                      ? '#10b981'
-                      : '#6366f1'
-              }}
+              className={`order-card order-card-${order.status}`}
             >
               {/* Order Header */}
               <div className="order-header">
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <div className="order-header-content">
+                  <div className="order-id-status">
                     <span className="order-id">{order.orderNumber}</span>
                     <span className={`order-status status-${order.status}`}>
                       {order.status}
@@ -237,74 +195,34 @@ const KitchenOrders = () => {
                   </div>
                   
                   {/* Customer/Guest Name */}
-                  <div style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    marginBottom: '6px'
-                  }}>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>👤</span>
-                    <span style={{ 
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#374151'
-                    }}>
+                  <div className="customer-info">
+                    <span className="customer-icon">👤</span>
+                    <span className="customer-name">
                       {order.customerName || order.guestInfo?.name || 'Customer'}
                     </span>
                     {order.guestInfo?.phone && (
-                      <span style={{ 
-                        fontSize: '12px',
-                        color: '#9ca3af',
-                        marginLeft: '4px'
-                      }}>
+                      <span className="customer-phone">
                         • {order.guestInfo.phone}
                       </span>
                     )}
                   </div>
 
                   {/* Order Type & Time */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                    <span style={{ 
-                      fontSize: '13px',
-                      color: '#6b7280',
-                      background: '#f3f4f6',
-                      padding: '3px 10px',
-                      borderRadius: '12px',
-                      fontWeight: 500
-                    }}>
+                  <div className="order-meta">
+                    <span className="order-type-badge">
                       {order.orderType === 'dine-in' ? '🍽️' : '🥡'} {order.orderType === 'dine-in' && order.tableNumber ? `Table ${order.tableNumber}` : order.orderType}
                     </span>
-                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                    <span className="order-time">
                       ⏰ {getTimeAgo(order.createdAt)}
                     </span>
                   </div>
 
                   {/* Payment Info */}
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <span style={{ 
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px',
-                      background: order.paymentMethod === 'card' ? '#dbeafe' : '#fef3c7',
-                      color: order.paymentMethod === 'card' ? '#1e40af' : '#92400e',
-                      padding: '4px 10px',
-                      borderRadius: '12px',
-                      fontWeight: 600
-                    }}>
+                  <div className="payment-info">
+                    <span className={`payment-method-badge payment-${order.paymentMethod}`}>
                       {order.paymentMethod === 'card' ? '💳 Card' : '💵 Cash'}
                     </span>
-                    <span style={{ 
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px',
-                      background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef9c3',
-                      color: order.paymentStatus === 'paid' ? '#166534' : '#854d0e',
-                      padding: '4px 10px',
-                      borderRadius: '12px',
-                      fontWeight: 600
-                    }}>
+                    <span className={`payment-status-badge payment-status-${order.paymentStatus}`}>
                       {order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Pending'}
                     </span>
                   </div>
@@ -318,12 +236,7 @@ const KitchenOrders = () => {
                     <span className="order-item-name">
                       {item.name}
                       {item.customizations && Object.keys(item.customizations).length > 0 && (
-                        <span style={{ 
-                          display: 'block', 
-                          fontSize: '12px', 
-                          color: '#9ca3af',
-                          fontStyle: 'italic'
-                        }}>
+                        <span className="order-item-customization">
                           {JSON.stringify(item.customizations)}
                         </span>
                       )}
@@ -335,30 +248,15 @@ const KitchenOrders = () => {
 
               {/* Special Notes */}
               {order.specialNotes && (
-                <div style={{
-                  background: '#fef3c7',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  marginBottom: '16px',
-                  fontSize: '13px',
-                  color: '#92400e',
-                }}>
+                <div className="special-notes">
                   ⚠️ {order.specialNotes}
                 </div>
               )}
 
               {/* Total Amount */}
-              <div style={{
-                background: '#f9fafb',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                marginBottom: '16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontWeight: 600,
-              }}>
+              <div className="order-total">
                 <span>Total:</span>
-                <span style={{ color: '#f7931e' }}>Rs. {order.total.toFixed(2)}</span>
+                <span className="order-total-amount">Rs. {order.total.toFixed(2)}</span>
               </div>
 
               {/* Action Buttons */}
@@ -397,8 +295,7 @@ const KitchenOrders = () => {
                 )}
                 {order.status === 'served' && (
                   <button
-                    className="btn-action btn-complete"
-                    style={{ background: '#6366f1' }}
+                    className="btn-action btn-complete btn-complete-final"
                     onClick={() => updateOrderStatus(order._id, 'completed')}
                   >
                     ✅ Complete Order
