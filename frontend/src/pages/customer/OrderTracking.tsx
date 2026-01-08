@@ -7,6 +7,7 @@ import '../../styles/OrderTracking.css';
 type TrackingStage = 'placed' | 'accepted' | 'preparing' | 'ready' | 'served' | 'delivered';
 
 const OrderTracking: React.FC = () => {
+  const location = useLocation<{ orderId?: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,7 @@ const OrderTracking: React.FC = () => {
     };
 
     loadOrder();
-  }, [location.state]);
+  }, []);
 
   const fetchOrder = async (orderNumberOrId: string) => {
     try {
