@@ -3,15 +3,15 @@ import { Link } from "react-router-dom";
 import "../../styles/NavBar.css";
 
 interface NavBarProps {
-  role: "customer" | "admin" | "kitchen" | "guest";
+  role: "customer" | "admin" | "kitchen";
 }
 
 const navLinks = {
   customer: [
-    { to: "/menu", label: "Menu" },
-    { to: "/cart", label: "Cart" },
-    { to: "/orders", label: "My Orders" },
-    { to: "/profile", label: "Profile" },
+    { to: "customer/menu", label: "Menu" },
+    { to: "customer/cart", label: "Cart" },
+    { to: "customer/orders", label: "My Orders" },
+    { to: "customer/profile", label: "Profile" },
   ],
   admin: [
     { to: "/admin/dashboard", label: "Dashboard" },
@@ -21,12 +21,7 @@ const navLinks = {
   kitchen: [
     { to: "/kitchen/orders", label: "Orders" },
     { to: "/kitchen/inventory", label: "Inventory" },
-  ],
-  guest: [
-    { to: "/menu", label: "Menu" },
-    { to: "/auth/login", label: "Login" },
-    { to: "/auth/register", label: "Register" },
-  ],
+  ]
 };
 
 const NavBar: React.FC<NavBarProps> = ({ role }) => (

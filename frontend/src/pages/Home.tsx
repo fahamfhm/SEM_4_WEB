@@ -3,11 +3,13 @@ import "../styles/Home.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect} from "react";
 import { useTable } from "../context/TableContext";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tableNumber, diningType, setTableInfo } = useTable();
+  const { user, isAuthenticated } = useAuth();
 
   // Check for table parameter in URL when component mounts
   useEffect(() => {
@@ -33,6 +35,17 @@ const Home = () => {
   
   const handleGuestOrderClick = () => {
     navigate("/guest/menu");
+  };
+
+  const handleContinueAsUser = () => {
+    // Redirect based on user role
+    if (user?.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user?.role === 'kitchen') {
+      navigate('/kitchen/orders');
+    } else {
+      navigate('/customer/menu');
+    }
   };
   return (
     <div className="home-root">
@@ -78,18 +91,37 @@ const Home = () => {
               </p>
 
               <div className="home-actions">
-                <button
-                  className="fc-primary-btn home-btn home-btn-glow"
-                  onClick={handleGuestOrderClick}
-                >
-                  🍔 Order as Guest
-                </button>
-                <button
-                  className="fc-secondary-btn home-btn home-btn-outline"
-                  onClick={HandleLoginClick}
-                >
-                  👤 Sign In / Register
-                </button>
+                {isAuthenticated && user ? (
+                  <>
+                    <button
+                      className="fc-primary-btn home-btn home-btn-glow"
+                      onClick={handleContinueAsUser}
+                    >
+                      👋 Continue as {user.name}
+                    </button>
+                    <button
+                      className="fc-secondary-btn home-btn home-btn-outline"
+                      onClick={handleGuestOrderClick}
+                    >
+                      🍔 Order as Guest
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="fc-primary-btn home-btn home-btn-glow"
+                      onClick={handleGuestOrderClick}
+                    >
+                      🍔 Order as Guest
+                    </button>
+                    <button
+                      className="fc-secondary-btn home-btn home-btn-outline"
+                      onClick={HandleLoginClick}
+                    >
+                      👤 Sign In / Register
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="home-badges">

@@ -1,17 +1,9 @@
-/* Professional Customer Layout Styles */
+/* Professional Customer Layout Styles
 .customer-layout {
   min-height: 100vh;
   background-color: white;
   display: flex;
   flex-direction: column;
-}
-
-.customer-layout nav {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  box-shadow: var(--shadow-lg);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
 }
 
 .customer-content {
@@ -34,4 +26,4 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
-}
+} */
