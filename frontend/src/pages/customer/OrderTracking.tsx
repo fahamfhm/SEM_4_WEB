@@ -7,7 +7,7 @@ import '../../styles/OrderTracking.css';
 type TrackingStage = 'placed' | 'accepted' | 'preparing' | 'ready' | 'served' | 'delivered';
 
 const OrderTracking: React.FC = () => {
-  const location = useLocation<{ orderId?: string }>();
+  const location = useLocation();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ const OrderTracking: React.FC = () => {
   useEffect(() => {
     const loadOrder = async () => {
       // Check if orderId was passed from Checkout success
-      const stateOrderId = location.state?.orderId;
+      const stateOrderId = (location.state as { orderId?: string })?.orderId;
       
       if (stateOrderId) {
         try {
