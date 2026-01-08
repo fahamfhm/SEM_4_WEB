@@ -37,6 +37,7 @@ const Checkout: React.FC = () => {
     customerPhone: ''
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderNumber, setPlacedOrderNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCardModal, setShowCardModal] = useState(false);
@@ -162,12 +163,14 @@ const Checkout: React.FC = () => {
       const order = await OrderService.createOrder(orderData);
       
       console.log('Order created:', order);
+      setPlacedOrderNumber(order.orderNumber);
       setOrderPlaced(true);
       clearCart();
       
       setTimeout(() => {
-        setOrderPlaced(false);
-        navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking');
+        navigate(isGuestMode ? '/guest/order-tracking' : '/customer/order-tracking', {
+          state: { orderId: order._id }
+        });
       }, 3000);
     } catch (err: any) {
       console.error('Order creation failed:', err);
@@ -206,11 +209,46 @@ const Checkout: React.FC = () => {
   if (orderPlaced) {
     return (
       <div className="checkout-success">
-        <div className="success-content">
-          <h2>✅ Order Placed Successfully!</h2>
-          <p>Order Number: #ORD-2025-001234</p>
-          <p>Total: LKR {cartTotal.toFixed(2)}</p>
-          <p className="success-message">Thank you for ordering! Your order is being prepared.</p>
+        <div className="success-animation">
+          <div className="success-checkmark">
+            <div className="checkmark-circle">
+              <svg className="checkmark-svg" viewBox="0 0 52 52">
+                <circle className="checkmark-circle-path" cx="26" cy="26" r="25" fill="none"/>
+                <path className="checkmark-check" fill="none" d="M14 27l7.5 7.5L38 18"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div className="success-content">
+            <h1 className="success-title">Order Placed Successfully!</h1>
+            <p className="success-subtitle">Thank you for your order</p>
+            
+            <div className="order-details-box">
+              <div className="order-detail-row">
+                <span className="detail-label">Order Number</span>
+                <span className="detail-value">#{placedOrderNumber}</span>
+              </div>
+              <div className="order-detail-row">
+                <span className="detail-label">Total Amount</span>
+                <span className="detail-value">LKR {(cartTotal + 200).toFixed(2)}</span>
+              </div>
+              <div className="order-detail-row">
+                <span className="detail-label">Payment Method</span>
+                <span className="detail-value">{formData.paymentMethod === 'card' ? '💳 Card' : '💵 Cash'}</span>
+              </div>
+            </div>
+            
+            <div className="success-message">
+              <p className="message-text">🍳 Your order is being prepared</p>
+              <p className="redirect-text">Redirecting to order tracking...</p>
+            </div>
+            
+            <div className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
         </div>
       </div>
     );

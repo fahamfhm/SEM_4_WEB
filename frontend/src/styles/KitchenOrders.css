@@ -49,28 +49,36 @@
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: var(--space-lg);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--lighter-gray);
+  border-bottom: 2px solid var(--lighter-gray);
 }
 
 .order-id {
-  font-weight: var(--font-bold);
+  font-weight: var(--font-extrabold);
   color: var(--dark);
   font-size: var(--font-size-lg);
+  letter-spacing: -0.5px;
 }
 
 .order-status {
-  padding: var(--space-sm) var(--space-lg);
+  padding: 4px 12px;
   border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
+  font-size: 11px;
   font-weight: var(--font-bold);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-pending {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+.status-confirmed {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
 }
 
@@ -81,6 +89,11 @@
 
 .status-ready {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.status-served {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
 }
 

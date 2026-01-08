@@ -141,8 +141,7 @@ export const getOrders = async (req, res) => {
     }
 
     const orders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .populate('menuItemId', 'name image category');
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -167,8 +166,7 @@ export const getOrder = async (req, res) => {
     const { guestSessionId } = req.query;
     
     const order = await Order.findById(req.params.id)
-      .populate('user', 'name email')
-      .populate('items.menuItemId', 'name image category');
+      .populate('user', 'name email');
 
     if (!order) {
       return res.status(404).json({
@@ -339,8 +337,7 @@ export const getAllOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
-      .populate('user', 'name email phone')
-      .populate('items.menuItemId', 'name image category');
+      .populate('user', 'name email phone');
 
     const total = await Order.countDocuments(query);
 

@@ -1,123 +1,65 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import OrderService from '../../services/orderService';
+import type { Order } from '../../services/orderService';
 import '../../styles/KitchenOrders.css';
 
-// ============================================
-// API Configuration
-// ============================================
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Set to false to disable demo data and use only backend
-const USE_DEMO_DATA_AS_FALLBACK = true;
-
-// ============================================
-// Types
-// ============================================
-interface OrderItem {
-  name: string;
-  quantity: number;
-  customizations?: string[];
-}
-
-interface KitchenOrder {
-  id: string;
-  orderNumber: string;
-  tableNumber: string;
-  status: 'pending' | 'preparing' | 'ready';
-  items: OrderItem[];
-  createdAt: string;
-  specialNotes?: string;
-}
-
-// ============================================
-// DEMO DATA - Remove this section after backend is ready
-// ============================================
-const DEMO_ORDERS: KitchenOrder[] = [
-  {
-    id: '1',
-    orderNumber: '#ORD-001',
-    tableNumber: 'Table 5',
-    status: 'pending',
-    items: [
-      { name: 'Grilled Chicken Burger', quantity: 2, customizations: ['No onions', 'Extra cheese'] },
-      { name: 'French Fries', quantity: 2 },
-      { name: 'Coca Cola', quantity: 2 },
-    ],
-    createdAt: new Date(Date.now() - 5 * 60000).toISOString(),
-    specialNotes: 'Customer has nut allergy',
-  },
-  {
-    id: '2',
-    orderNumber: '#ORD-002',
-    tableNumber: 'Table 3',
-    status: 'pending',
-    items: [
-      { name: 'Margherita Pizza', quantity: 1 },
-      { name: 'Caesar Salad', quantity: 1, customizations: ['Dressing on side'] },
-    ],
-    createdAt: new Date(Date.now() - 8 * 60000).toISOString(),
-  },
-  {
-    id: '3',
-    orderNumber: '#ORD-003',
-    tableNumber: 'Table 8',
-    status: 'preparing',
-    items: [
-      { name: 'Spaghetti Carbonara', quantity: 1 },
-      { name: 'Garlic Bread', quantity: 1 },
-      { name: 'Tiramisu', quantity: 1 },
-    ],
-    createdAt: new Date(Date.now() - 12 * 60000).toISOString(),
-  },
-  {
-    id: '4',
-    orderNumber: '#ORD-004',
-    tableNumber: 'Table 2',
-    status: 'preparing',
-    items: [
-      { name: 'Fish & Chips', quantity: 2 },
-      { name: 'Lemonade', quantity: 2 },
-    ],
-    createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
-  },
-  {
-    id: '5',
-    orderNumber: '#ORD-005',
-    tableNumber: 'Table 10',
-    status: 'ready',
-    items: [
-      { name: 'Veggie Wrap', quantity: 1, customizations: ['Gluten-free wrap'] },
-      { name: 'Smoothie Bowl', quantity: 1 },
-    ],
-    createdAt: new Date(Date.now() - 20 * 60000).toISOString(),
-  },
-];
-// ============================================
-// END DEMO DATA
-// ============================================
-
-type FilterType = 'all' | 'pending' | 'preparing' | 'ready';
+// Kitchen order status type matching database
+type KitchenStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served';
+type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served';
 
 const KitchenOrders = () => {
-  const [orders, setOrders] = useState<KitchenOrder[]>([]);
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState<Order[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
+    if (!token || !userStr) {
+      alert('Please login to access kitchen orders');
+      navigate('/auth/login');
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userStr);
+      if (user.role !== 'admin' && user.role !== 'kitchen') {
+        alert('Access denied. Kitchen or Admin role required.');
+        navigate('/');
+        return;
+      }
+    } catch (err) {
+      console.error('Invalid user data:', err);
+      navigate('/auth/login');
+    }
+  }, [navigate]);
 
   // Fetch orders from backend
   const fetchOrders = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_BASE_URL}/orders/kitchen`);
-      setOrders(response.data.data || response.data);
-    } catch (err) {
+      // Get all orders, can add filters for kitchen-specific statuses
+      const result = await OrderService.getAllOrders({
+        status: undefined, // Get all statuses
+      });
+      // Filter to show only active orders (not completed or cancelled)
+      const activeOrders = result.orders.filter(
+        o => !['completed', 'cancelled'].includes(o.status)
+      );
+      setOrders(activeOrders);
+    } catch (err: any) {
       console.error('Error fetching orders:', err);
-      // Fallback to demo data if enabled
-      if (USE_DEMO_DATA_AS_FALLBACK) {
-        console.log('Using demo data as fallback');
-        setOrders(DEMO_ORDERS);
-        setError(null);
+      if (err.response?.status === 403) {
+        setError('Access denied. Please login with kitchen or admin credentials.');
+      } else if (err.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        setTimeout(() => navigate('/auth/login'), 2000);
       } else {
         setError('Failed to load orders. Please try again.');
       }
@@ -127,43 +69,26 @@ const KitchenOrders = () => {
   };
 
   // Update order status via API
-  const updateOrderStatus = async (orderId: string, newStatus: KitchenOrder['status']) => {
+  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      await axios.patch(`${API_BASE_URL}/orders/${orderId}/status`, { status: newStatus });
-      // Update local state
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      await OrderService.updateOrderStatus(orderId, newStatus);
+      // Refresh orders
+      await fetchOrders();
     } catch (err) {
       console.error('Error updating order status:', err);
-      // If API fails but demo mode is on, still update locally
-      if (USE_DEMO_DATA_AS_FALLBACK) {
-        setOrders(prevOrders =>
-          prevOrders.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-          )
-        );
-      } else {
-        alert('Failed to update order status. Please try again.');
-      }
+      alert('Failed to update order status. Please try again.');
     }
   };
 
   // Complete and remove order
   const completeOrder = async (orderId: string) => {
     try {
-      await axios.patch(`${API_BASE_URL}/orders/${orderId}/status`, { status: 'delivered' });
-      setOrders(prev => prev.filter(o => o.id !== orderId));
+      await OrderService.updateOrderStatus(orderId, 'served');
+      // Remove from list after marking as served
+      setOrders(prev => prev.filter(o => o._id !== orderId));
     } catch (err) {
       console.error('Error completing order:', err);
-      // If API fails but demo mode is on, still remove locally
-      if (USE_DEMO_DATA_AS_FALLBACK) {
-        setOrders(prev => prev.filter(o => o.id !== orderId));
-      } else {
-        alert('Failed to complete order. Please try again.');
-      }
+      alert('Failed to complete order. Please try again.');
     }
   };
 
@@ -172,7 +97,6 @@ const KitchenOrders = () => {
     fetchOrders();
 
     // Poll for new orders every 30 seconds
-    // TODO: Replace with WebSocket for real-time updates
     const interval = setInterval(fetchOrders, 30000);
 
     return () => clearInterval(interval);
@@ -239,7 +163,7 @@ const KitchenOrders = () => {
 
       {/* Filter Buttons */}
       <div className="order-filters" style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-        {(['all', 'pending', 'preparing', 'ready'] as FilterType[]).map(filter => (
+        {(['all', 'pending', 'confirmed', 'preparing', 'ready', 'served'] as FilterType[]).map(filter => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
@@ -288,32 +212,101 @@ const KitchenOrders = () => {
         <div className="orders-grid">
           {filteredOrders.map(order => (
             <div 
-              key={order.id} 
+              key={order._id} 
               className="order-card"
               style={{ 
-                borderLeftColor: order.status === 'pending' 
+                borderLeftColor: ['pending', 'confirmed'].includes(order.status)
                   ? '#fbbf24' 
                   : order.status === 'preparing' 
                     ? '#f97316' 
-                    : '#10b981' 
+                    : order.status === 'ready'
+                      ? '#10b981'
+                      : '#6366f1'
               }}
             >
               {/* Order Header */}
               <div className="order-header">
-                <div>
-                  <span className="order-id">{order.orderNumber}</span>
-                  <span style={{ 
-                    display: 'block', 
-                    fontSize: '13px', 
-                    color: '#6b7280',
-                    marginTop: '4px'
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span className="order-id">{order.orderNumber}</span>
+                    <span className={`order-status status-${order.status}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  
+                  {/* Customer/Guest Name */}
+                  <div style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginBottom: '6px'
                   }}>
-                    {order.tableNumber} • {getTimeAgo(order.createdAt)}
-                  </span>
+                    <span style={{ fontSize: '13px', color: '#6b7280' }}>👤</span>
+                    <span style={{ 
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#374151'
+                    }}>
+                      {order.guestInfo?.name || 'Customer'}
+                    </span>
+                    {order.guestInfo?.phone && (
+                      <span style={{ 
+                        fontSize: '12px',
+                        color: '#9ca3af',
+                        marginLeft: '4px'
+                      }}>
+                        • {order.guestInfo.phone}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Order Type & Time */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ 
+                      fontSize: '13px',
+                      color: '#6b7280',
+                      background: '#f3f4f6',
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 500
+                    }}>
+                      {order.orderType === 'dine-in' ? '🍽️' : '🥡'} {order.orderType === 'dine-in' && order.tableNumber ? `Table ${order.tableNumber}` : order.orderType}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                      ⏰ {getTimeAgo(order.createdAt)}
+                    </span>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <span style={{ 
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '12px',
+                      background: order.paymentMethod === 'card' ? '#dbeafe' : '#fef3c7',
+                      color: order.paymentMethod === 'card' ? '#1e40af' : '#92400e',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 600
+                    }}>
+                      {order.paymentMethod === 'card' ? '💳 Card' : '💵 Cash'}
+                    </span>
+                    <span style={{ 
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '12px',
+                      background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef9c3',
+                      color: order.paymentStatus === 'paid' ? '#166534' : '#854d0e',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 600
+                    }}>
+                      {order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Pending'}
+                    </span>
+                  </div>
                 </div>
-                <span className={`order-status status-${order.status}`}>
-                  {order.status}
-                </span>
               </div>
 
               {/* Order Items */}
@@ -322,14 +315,14 @@ const KitchenOrders = () => {
                   <div key={idx} className="order-item">
                     <span className="order-item-name">
                       {item.name}
-                      {item.customizations && item.customizations.length > 0 && (
+                      {item.customizations && Object.keys(item.customizations).length > 0 && (
                         <span style={{ 
                           display: 'block', 
                           fontSize: '12px', 
                           color: '#9ca3af',
                           fontStyle: 'italic'
                         }}>
-                          {item.customizations.join(', ')}
+                          {JSON.stringify(item.customizations)}
                         </span>
                       )}
                     </span>
@@ -352,12 +345,34 @@ const KitchenOrders = () => {
                 </div>
               )}
 
+              {/* Total Amount */}
+              <div style={{
+                background: '#f9fafb',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontWeight: 600,
+              }}>
+                <span>Total:</span>
+                <span style={{ color: '#f7931e' }}>Rs. {order.total.toFixed(2)}</span>
+              </div>
+
               {/* Action Buttons */}
               <div className="order-actions">
                 {order.status === 'pending' && (
                   <button
                     className="btn-action btn-preparing"
-                    onClick={() => updateOrderStatus(order.id, 'preparing')}
+                    onClick={() => updateOrderStatus(order._id, 'confirmed')}
+                  >
+                    ✅ Confirm Order
+                  </button>
+                )}
+                {order.status === 'confirmed' && (
+                  <button
+                    className="btn-action btn-preparing"
+                    onClick={() => updateOrderStatus(order._id, 'preparing')}
                   >
                     🍳 Start Preparing
                   </button>
@@ -365,17 +380,26 @@ const KitchenOrders = () => {
                 {order.status === 'preparing' && (
                   <button
                     className="btn-action btn-ready"
-                    onClick={() => updateOrderStatus(order.id, 'ready')}
+                    onClick={() => updateOrderStatus(order._id, 'ready')}
                   >
-                    ✅ Mark Ready
+                    📦 Mark Ready
                   </button>
                 )}
                 {order.status === 'ready' && (
                   <button
                     className="btn-action btn-complete"
-                    onClick={() => completeOrder(order.id)}
+                    onClick={() => completeOrder(order._id)}
                   >
-                    🎉 Complete & Remove
+                    {order.orderType === 'dine-in' ? '🍽️ Served' : '🎉 Delivered'}
+                  </button>
+                )}
+                {order.status === 'served' && (
+                  <button
+                    className="btn-action btn-complete"
+                    style={{ background: '#6366f1' }}
+                    onClick={() => updateOrderStatus(order._id, 'completed')}
+                  >
+                    ✅ Complete Order
                   </button>
                 )}
               </div>

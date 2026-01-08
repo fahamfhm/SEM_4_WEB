@@ -64,8 +64,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
     try {
       await register(formData.name, formData.email, formData.password);
       
-      // Redirect to login page after successful registration
-      navigate('/auth/login', { state: { message: 'Registration successful! Please login to continue.' } });
+      // Redirect based on user role after successful registration
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'kitchen') {
+        navigate('/kitchen/orders');
+      } else {
+        navigate('/customer/menu');
+      }
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Failed to register. Please try again.');

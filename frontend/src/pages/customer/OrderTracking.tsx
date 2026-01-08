@@ -1,70 +1,118 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import OrderService from '../../services/orderService';
+import type { Order } from '../../services/orderService';
 import '../../styles/OrderTracking.css';
 
+type TrackingStage = 'placed' | 'accepted' | 'preparing' | 'ready' | 'served' | 'delivered';
+
 interface OrderStatus {
-  stage: 'placed' | 'accepted' | 'preparing' | 'ready' | 'delivered';
+  stage: TrackingStage;
   timestamp?: string;
   completed: boolean;
 }
-
-interface TrackingOrder {
-  id: string;
-  orderNumber: string;
-  estimatedTime: number;
-  currentStatus: OrderStatus['stage'];
-  statuses: OrderStatus[];
-  items: Array<{ name: string; quantity: number }>;
-}
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const OrderTracking: React.FC = () => {
   const location = useLocation();
   const isGuestMode = location.pathname.includes('/guest');
   
-  const [order, setOrder] = useState<TrackingOrder | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Load guest order from session storage
-  useEffect(() => {
-    if (isGuestMode) {
-      const guestOrderData = sessionStorage.getItem('guestOrderData');
-      if (guestOrderData) {
-        const orderData = JSON.parse(guestOrderData);
-        setOrder({
-          id: orderData.orderNumber,
-          orderNumber: orderData.orderNumber,
-          estimatedTime: 20,
-          currentStatus: 'placed',
-          statuses: [
-            { stage: 'placed', completed: true, timestamp: orderData.timestamp },
-            { stage: 'accepted', completed: false },
-            { stage: 'preparing', completed: false },
-            { stage: 'ready', completed: false },
-            { stage: 'delivered', completed: false }
-          ],
-          items: orderData.items.map((item: any) => ({
-            name: item.name,
-            quantity: item.quantity
-          }))
-        });
-      }
+  // Map database status to tracking stage
+  const mapStatusToStage = (status: Order['status'], orderType: Order['orderType']): TrackingStage => {
+    switch (status) {
+      case 'pending':
+        return 'placed';
+      case 'confirmed':
+        return 'accepted';
+      case 'preparing':
+        return 'preparing';
+      case 'ready':
+        return 'ready';
+      case 'served':
+        return orderType === 'dine-in' ? 'served' : 'delivered';
+      case 'completed':
+        return orderType === 'dine-in' ? 'served' : 'delivered';
+      default:
+        return 'placed';
     }
-  }, [isGuestMode]);
+  };
 
-  const fetchOrder = async (id: string) => {
+  // Get status stages based on order type
+  const getStatusStages = (orderType: Order['orderType']): TrackingStage[] => {
+    if (orderType === 'dine-in') {
+      return ['placed', 'accepted', 'preparing', 'ready', 'served'];
+    } else {
+      return ['placed', 'accepted', 'preparing', 'ready', 'delivered'];
+    }
+  };
+
+  // Get payment status position
+  const getPaymentStatusStage = (paymentMethod: Order['paymentMethod'], orderType: Order['orderType']): TrackingStage => {
+    if (paymentMethod === 'card') {
+      return 'placed'; // Show paid status right after placing order for card
+    } else {
+      return orderType === 'dine-in' ? 'served' : 'delivered'; // Show paid status after delivery/serving for cash
+    }
+  };
+
+  // Load order from navigation state or database
+  useEffect(() => {
+    const loadOrder = async () => {
+      // Check if orderId was passed from Checkout success
+      const stateOrderId = location.state?.orderId;
+      
+      if (stateOrderId) {
+        try {
+          setLoading(true);
+          const guestSessionId = OrderService.hasGuestSession() ? OrderService.getGuestSessionId() : undefined;
+          const fetchedOrder = await OrderService.getOrder(stateOrderId, guestSessionId);
+          setOrder(fetchedOrder);
+          setOrderId(fetchedOrder.orderNumber);
+          setError('');
+        } catch (err) {
+          console.error('Error fetching order:', err);
+          setError('Failed to load order details');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadOrder();
+  }, [location.state]);
+
+  const fetchOrder = async (orderNumberOrId: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/orders/${id}/tracking`);
-      setOrder(response.data.data);
       setError('');
+      
+      // Check if it's a guest user
+      const guestSessionId = OrderService.hasGuestSession() ? OrderService.getGuestSessionId() : undefined;
+      
+      // Try to find order by order number or ID
+      const orders = await OrderService.getOrders(guestSessionId);
+      const foundOrder = orders.find(
+        o => o.orderNumber === orderNumberOrId || o._id === orderNumberOrId
+      );
+      
+      if (foundOrder) {
+        setOrder(foundOrder);
+      } else {
+        // If not found in list, try fetching directly by ID
+        try {
+          const fetchedOrder = await OrderService.getOrder(orderNumberOrId, guestSessionId);
+          setOrder(fetchedOrder);
+        } catch {
+          setError('Order not found. Please check your order number.');
+        }
+      }
     } catch (err) {
       console.error('Error fetching order:', err);
-      setError('Order not found');
+      setError('Failed to fetch order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,13 +125,36 @@ const OrderTracking: React.FC = () => {
     }
   };
 
-  const statusStages: OrderStatus['stage'][] = ['placed', 'accepted', 'preparing', 'ready', 'delivered'];
-  const statusLabels: Record<OrderStatus['stage'], string> = {
+  const statusLabels: Record<TrackingStage, string> = {
     placed: '📝 Order Placed',
     accepted: '✅ Accepted',
     preparing: '🍳 Preparing',
-    ready: '📦 Ready for Pickup',
+    ready: '📦 Ready',
+    served: '🍽️ Served',
     delivered: '🎉 Delivered'
+  };
+
+  const getCurrentStage = (): TrackingStage => {
+    if (!order) return 'placed';
+    return mapStatusToStage(order.status, order.orderType);
+  };
+
+  const getEstimatedTime = (): number => {
+    if (!order) return 0;
+    const currentStage = getCurrentStage();
+    switch (currentStage) {
+      case 'placed':
+      case 'accepted':
+        return 25;
+      case 'preparing':
+        return 15;
+      case 'ready':
+        return 5;
+      case 'delivered':
+        return 0;
+      default:
+        return 20;
+    }
   };
 
   return (
@@ -117,23 +188,49 @@ const OrderTracking: React.FC = () => {
           <div className="order-header-info">
             <div>
               <h2>{order.orderNumber}</h2>
-              <p>Estimated time: {order.estimatedTime} mins</p>
+              <p>Estimated time: {getEstimatedTime()} mins</p>
+              <p className="order-type-badge">
+                {order.orderType === 'dine-in' ? '🍽️ Dine-In' : '🥡 Takeaway'}
+                {order.tableNumber && ` • Table ${order.tableNumber}`}
+              </p>
+            </div>
+            <div className="order-total">
+              <span>Total</span>
+              <strong>Rs. {order.total.toFixed(2)}</strong>
             </div>
           </div>
 
           <div className="status-timeline">
-            {statusStages.map((stage, index) => {
-              const isCompleted = statusStages.indexOf(order.currentStatus) >= index;
-              const isActive = order.currentStatus === stage;
+            {getStatusStages(order.orderType).map((stage, index, stages) => {
+              const currentStageIndex = stages.indexOf(getCurrentStage());
+              const isCompleted = currentStageIndex >= index;
+              const isActive = getCurrentStage() === stage;
+              const paymentStage = getPaymentStatusStage(order.paymentMethod, order.orderType);
+              const showPaymentStatus = stage === paymentStage;
+              const isPaymentCompleted = order.paymentStatus === 'paid' && (paymentStage === 'placed' ? true : isCompleted);
+
+              // Get timestamp based on stage
+              let timestamp: string | undefined;
+              if (stage === 'placed') timestamp = order.orderedAt || order.createdAt;
+              else if (stage === 'accepted') timestamp = order.confirmedAt;
+              else if (stage === 'preparing') timestamp = order.preparedAt;
+              else if (stage === 'ready') timestamp = order.confirmedAt; // Use confirmedAt as placeholder
+              else if (stage === 'served') timestamp = order.completedAt;
+              else if (stage === 'delivered') timestamp = order.completedAt;
 
               return (
                 <div key={stage} className={`timeline-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
                   <div className="timeline-dot"></div>
-                  {index < statusStages.length - 1 && <div className="timeline-line"></div>}
+                  {index < stages.length - 1 && <div className="timeline-line"></div>}
                   <div className="timeline-label">
                     <p className="status-text">{statusLabels[stage]}</p>
-                    {isCompleted && order.statuses[index]?.timestamp && (
-                      <p className="status-time">{new Date(order.statuses[index].timestamp!).toLocaleTimeString()}</p>
+                    {isCompleted && timestamp && (
+                      <p className="status-time">{new Date(timestamp).toLocaleTimeString()}</p>
+                    )}
+                    {showPaymentStatus && (
+                      <div className={`payment-indicator ${isPaymentCompleted ? 'paid' : 'pending'}`}>
+                        {isPaymentCompleted ? '💳 Paid' : '💰 Payment Pending'}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -147,10 +244,17 @@ const OrderTracking: React.FC = () => {
               {order.items.map((item, idx) => (
                 <div key={idx} className="item-row">
                   <span>{item.name}</span>
-                  <span>× {item.quantity}</span>
+                  <span className="item-quantity">× {item.quantity}</span>
+                  <span className="item-price">Rs. {item.itemTotal.toFixed(2)}</span>
                 </div>
               ))}
             </div>
+            {order.specialNotes && (
+              <div className="special-notes">
+                <strong>Special Instructions:</strong>
+                <p>{order.specialNotes}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
