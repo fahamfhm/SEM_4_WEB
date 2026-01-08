@@ -41,6 +41,11 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: false
   },
+  // Customer name (populated from User or guestInfo)
+  customerName: {
+    type: String,
+    required: false
+  },
   // Guest session information
   guestSessionId: {
     type: String,

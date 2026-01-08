@@ -29,6 +29,7 @@ export interface Order {
   _id: string;
   orderNumber: string;
   user?: string;
+  customerName?: string;
   guestSessionId?: string;
   guestInfo?: GuestInfo;
   items: OrderItem[];

@@ -92,8 +92,10 @@ export const createOrder = async (req, res) => {
     // Add user or guest information
     if (req.user) {
       orderData.user = req.user.id;
+      orderData.customerName = req.user.name; // Add customer name from authenticated user
     } else {
       orderData.guestSessionId = guestSessionId;
+      orderData.customerName = guestInfo.name; // Add customer name from guest info
       orderData.guestInfo = {
         name: guestInfo.name,
         phone: guestInfo.phone

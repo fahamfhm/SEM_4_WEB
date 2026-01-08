@@ -247,7 +247,7 @@ const KitchenOrders = () => {
                       fontWeight: 600,
                       color: '#374151'
                     }}>
-                      {order.guestInfo?.name || 'Customer'}
+                      {order.customerName || order.guestInfo?.name || 'Customer'}
                     </span>
                     {order.guestInfo?.phone && (
                       <span style={{ 
