@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OrderService from '../../services/orderService';
 import type { Order } from '../../services/orderService';
 import '../../styles/KitchenOrders.css';
 
 // Kitchen order status type matching database
-type KitchenStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served';
 type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served';
 
 const KitchenOrders = () => {
@@ -40,7 +39,7 @@ const KitchenOrders = () => {
   }, [navigate]);
 
   // Fetch orders from backend
-  const fetchOrders = async () => {
+  const fetchOrders = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -53,11 +52,12 @@ const KitchenOrders = () => {
         o => !['completed', 'cancelled'].includes(o.status)
       );
       setOrders(activeOrders);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching orders:', err);
-      if (err.response?.status === 403) {
+      const error = err as { response?: { status?: number } };
+      if (error.response?.status === 403) {
         setError('Access denied. Please login with kitchen or admin credentials.');
-      } else if (err.response?.status === 401) {
+      } else if (error.response?.status === 401) {
         setError('Session expired. Please login again.');
         setTimeout(() => navigate('/auth/login'), 2000);
       } else {
@@ -66,7 +66,7 @@ const KitchenOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   // Update order status via API
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
@@ -100,7 +100,7 @@ const KitchenOrders = () => {
     const interval = setInterval(fetchOrders, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchOrders]);
 
   // Filter orders based on active filter
   const filteredOrders = activeFilter === 'all' 
@@ -116,11 +116,13 @@ const KitchenOrders = () => {
   };
 
   // Get counts for filter badges
-  const getCounts = () => ({
+  const getCounts = (): Record<FilterType, number> => ({
     all: orders.length,
     pending: orders.filter(o => o.status === 'pending').length,
+    confirmed: orders.filter(o => o.status === 'confirmed').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
     ready: orders.filter(o => o.status === 'ready').length,
+    served: orders.filter(o => o.status === 'served').length,
   });
 
   const counts = getCounts();

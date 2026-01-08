@@ -6,16 +6,7 @@ import '../../styles/OrderTracking.css';
 
 type TrackingStage = 'placed' | 'accepted' | 'preparing' | 'ready' | 'served' | 'delivered';
 
-interface OrderStatus {
-  stage: TrackingStage;
-  timestamp?: string;
-  completed: boolean;
-}
-
 const OrderTracking: React.FC = () => {
-  const location = useLocation();
-  const isGuestMode = location.pathname.includes('/guest');
-  
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
