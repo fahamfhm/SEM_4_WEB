@@ -1,24 +1,30 @@
 /* Kitchen Menu Availability Page Styles */
 .menu-availability-page {
   min-height: calc(100vh - 70px);
-  padding: var(--space-2xl) var(--space-md);
+  min-height: calc(100dvh - 70px);
+  padding: clamp(1rem, 4vw, 3rem) clamp(0.5rem, 2vw, 1rem);
   background-color: var(--bg-light);
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .availability-container {
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 /* Header */
 .availability-header {
   text-align: center;
-  margin-bottom: var(--space-2xl);
+  margin-bottom: clamp(1rem, 4vw, 3rem);
   animation: slideUp 0.8s ease-out;
 }
 
 .availability-header h1 {
-  font-size: var(--font-size-4xl);
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
   font-weight: var(--font-extrabold);
   color: var(--dark);
   margin-bottom: var(--space-sm);
@@ -30,7 +36,7 @@
 
 .availability-header .subtitle {
   color: var(--gray);
-  font-size: var(--font-size-lg);
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
 }
 
 /* Stats Cards */
@@ -501,6 +507,8 @@
 @media (max-width: 768px) {
   .menu-availability-page {
     padding: var(--space-lg) var(--space-sm);
+    width: 100%;
+    max-width: 100vw;
   }
 
   .availability-header h1 {
