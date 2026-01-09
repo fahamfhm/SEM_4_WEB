@@ -19,6 +19,7 @@ const Sidebar = ({ role }: SidebarProps) => {
     { to: '/', icon: '🏠', label: 'Home' },
     { to: '/kitchen/orders', icon: '📋', label: 'Orders' },
     { to: '/kitchen/inventory', icon: '📦', label: 'Inventory' },
+    { to: '/kitchen/menu-availability', icon: '🍽️', label: 'Menu Availability' },
   ];
 
   const adminLinks = [
