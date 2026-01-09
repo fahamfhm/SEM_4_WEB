@@ -34,8 +34,12 @@
 .header-content {
   flex: 1;
   min-width: 250px;
+  
 }
-
+.header-content:hover {
+  cursor: pointer;
+  transform: scale(1.0005);
+}
 .header-content h1 {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-extrabold);
@@ -46,6 +50,11 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.02em;
+}
+.header-content h1:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+  color: var(--primary-dark);
 }
 
 .subtitle {

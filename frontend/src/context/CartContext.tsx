@@ -64,9 +64,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(itemId)
     } else {
       setItems(
-        items.map(item =>
-          item.id === itemId ? { ...item, quantity } : item
-        )
+        items.map(item => {
+          if (item.id === itemId) {
+            // Calculate the price for one item (base price + customizations)
+            const customizationTotal = item.customizations.reduce(
+              (sum, group) =>
+                sum + group.selectedOptions.reduce((optSum, opt) => optSum + opt.price, 0),
+              0
+            )
+            const pricePerItem = item.basePrice + customizationTotal
+            const newItemTotal = pricePerItem * quantity
+
+            return { ...item, quantity, itemTotal: newItemTotal }
+          }
+          return item
+        })
       )
     }
   }

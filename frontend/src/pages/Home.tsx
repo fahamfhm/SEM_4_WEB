@@ -63,27 +63,22 @@ const Home = () => {
   };
 
   return (
-    <div className="home-root">
-      {/* vignette over wooden background */}
-      <div className="home-vignette" />
+    <div className="hm-container">
+      {/* Decorative overlay */}
+      <div className="hm-overlay" />
 
-      {/* many floating food icons in background */}
-      <div className="home-bg-icon home-bg-icon-1">🍕</div>
-      <div className="home-bg-icon home-bg-icon-2">🥤</div>
-      <div className="home-bg-icon home-bg-icon-3">🍟</div>
-      <div className="home-bg-icon home-bg-icon-4">🌶️</div>
-      <div className="home-bg-icon home-bg-icon-5">🥗</div>
-      <div className="home-bg-icon home-bg-icon-6">🍅</div>
-      <div className="home-bg-icon home-bg-icon-7">🧀</div>
-      <div className="home-bg-icon home-bg-icon-8">🥓</div>
-      <div className="home-bg-icon home-bg-icon-9">🍩</div>
-      <div className="home-bg-icon home-bg-icon-10">🧅</div>
-      <div className="home-bg-icon home-bg-icon-11">🍇</div>
+      {/* Floating food icons in background */}
+      <div className="hm-deco-icon">🍕</div>
+      <div className="hm-deco-icon">🥤</div>
+      <div className="hm-deco-icon">🍟</div>
+      <div className="hm-deco-icon">🌶️</div>
+      <div className="hm-deco-icon">🥗</div>
+      <div className="hm-deco-icon">🍅</div>
 
-      <div className="home-content">
+      <div className="hm-wrapper">
         {/* LEFT: logo, text & buttons */}
-        <section className="home-left">
-          <div className="home-logo-row">
+        <section className="hm-content-left">
+          <div className="hm-brand-header">
             {/* <div className="home-logo-icon-wrapper">
               <div className="home-logo-icon-glow" />
               <div className="fc-icon-circle home-logo-icon home-logo-icon-large">
@@ -92,68 +87,78 @@ const Home = () => {
             </div> */}
 
             {/* centre this block relative to left column, not including icon */}
-            <div className="home-logo-and-text">
-              <div className="home-logo-text">
-                <span className="home-logo-small">WELCOME TO</span>
-                <h1 className="home-logo-main">
-                  FOOD <span>COURT</span>
-                </h1>
-              </div>
+            <div className="hm-brand-text-wrap">
+              <span className="hm-brand-subtitle">WELCOME TO</span>
+              <h1 className="hm-brand-title">
+                FOOD <span className="hm-brand-title-highlight">COURT</span>
+              </h1>
 
-              <p className="home-tagline">
+              <p className="hm-tagline">
                 From sizzling burgers to stone‑baked pizza, customise every bite
                 just the way you crave.
               </p>
 
               {/* User Info Badge */}
               {isAuthenticated && user && (
-                <div className="home-user-info">
-                  <div className="home-user-badge">
-                    <span className="home-user-icon">{getRoleIcon(user.role)}</span>
-                    <div className="home-user-details">
-                      <span className="home-user-name">{user.name}</span>
-                      <span className="home-user-role">{user.role}</span>
-                    </div>
+                <div className="hm-user-badge">
+                  <span className="hm-user-icon">{getRoleIcon(user.role)}</span>
+                  <div className="hm-user-details">
+                    <span className="hm-user-name">{user.name}</span>
+                    <span className="hm-user-role">{user.role}</span>
                   </div>
                 </div>
               )}
 
-              <div className="home-actions">
+              <div className="hm-action-group">
                 {isAuthenticated && user ? (
                   <>
-                    <button
-                      className="fc-primary-btn home-btn home-btn-glow"
-                      onClick={handleContinueAsUser}
-                      aria-label={`Continue to ${user.role} dashboard`}
-                    >
-                      ✨ Go to Dashboard
-                    </button>
-                    <button
-                      className="fc-secondary-btn home-btn home-btn-outline"
-                      onClick={handleGuestOrderClick}
-                      aria-label="Order as guest without logging in"
-                    >
-                      🍔 Order as Guest
-                    </button>
-                    <button
-                      className="home-btn home-btn-logout"
-                      onClick={handleLogout}
-                      aria-label="Logout from your account"
-                    >
-                      🚪 Logout
-                    </button>
+                    {user.role === 'customer' ? (
+                      <>
+                        <button
+                          className="hm-btn hm-btn-primary hm-btn-shimmer"
+                          onClick={handleContinueAsUser}
+                          aria-label={`Order as ${user.name}`}
+                        >
+                          🍔 Order as {user.name}
+                        </button>
+                        <button
+                          className="hm-btn hm-btn-secondary"
+                          onClick={handleLogout}
+                          aria-label="Logout from your account"
+                        >
+                          🚪 Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="hm-btn hm-btn-primary hm-btn-shimmer"
+                          onClick={handleContinueAsUser}
+                          aria-label={`Continue to ${user.role} dashboard`}
+                        >
+                          ✨ Go to Dashboard
+                        </button>
+                        <button
+                          className="hm-btn hm-btn-secondary"
+                          onClick={handleLogout}
+                          aria-label="Logout from your account"
+                        >
+                          🚪 Logout
+                        </button>
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
                     <button
-                      className="fc-primary-btn home-btn home-btn-glow"
+                      className="hm-btn hm-btn-primary hm-btn-shimmer"
                       onClick={handleGuestOrderClick}
                       aria-label="Start ordering as guest"
                     >
                       🍔 Order as Guest
                     </button>
                     <button
-                      className="fc-secondary-btn home-btn home-btn-outline"
+                      className="hm-btn hm-btn-secondary"
                       onClick={HandleLoginClick}
                       aria-label="Sign in or create account"
                     >
@@ -163,15 +168,15 @@ const Home = () => {
                 )}
               </div>
 
-              <div className="home-badges">
-                <span className="fc-chip" role="status" aria-label="No account needed">
-                  <span className="home-dot-live" aria-hidden="true" /> No account needed
+              <div className="hm-badge-group">
+                <span className="hm-badge" role="status" aria-label="No account needed">
+                  <span className="hm-status-dot" aria-hidden="true" /> No account needed
                 </span>
-                <span className="fc-chip" aria-label="Quick and easy ordering">
+                <span className="hm-badge" aria-label="Quick and easy ordering">
                   <span aria-hidden="true">✨</span> Quick & Easy ordering
                 </span>
                 {diningType === 'table' && tableNumber && (
-                  <span className="fc-chip home-chip-table" aria-label={`Dining at table ${tableNumber}`}>
+                  <span className="hm-badge" aria-label={`Dining at table ${tableNumber}`}>
                     <span aria-hidden="true">🪑</span> Table {tableNumber}
                   </span>
                 )}
@@ -181,13 +186,13 @@ const Home = () => {
         </section>
 
         {/* RIGHT: rounded rectangle with burger image */}
-        <section className="home-right">
-          <div className="home-card">
-            <div className="home-fire-glow" />
+        <section className="hm-content-right">
+          <div className="hm-showcase-card">
+            <div className="hm-showcase-glow" />
             <img
               src="/burger.png" /* or /burger.jpg */
               alt="Cheesy burger"
-              className="home-burger-image tilted"
+              className="hm-showcase-image hm-tilted"
             />
           </div>
         </section>

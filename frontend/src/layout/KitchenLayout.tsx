@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import NavBar from '../components/Common/NavBar';
+import Sidebar from '../components/Common/Sidebar';
 import '../styles/KitchenLayout.css';
 
 const KitchenLayout = () => (
   <div className="kitchen-layout">
-    <NavBar role="kitchen" />
-    <main>
+    <Sidebar role="kitchen" />
+    <main className="kitchen-main">
       <Outlet />
     </main>
   </div>
