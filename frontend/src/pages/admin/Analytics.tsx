@@ -54,7 +54,7 @@ const Analytics: React.FC = () => {
 
       // Fetch orders
       const ordersRes = await api.get('/orders/admin/all');
-      const orders = ordersRes.data.orders || [];
+      const orders = ordersRes.data.data || [];
 
       // Filter orders by date range
       const now = new Date();

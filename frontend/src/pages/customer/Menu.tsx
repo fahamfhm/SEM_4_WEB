@@ -56,7 +56,7 @@ export default function Menu() {
   }
 
   const handleOrdersClick = () => {
-    navigate('/customer/order-history')
+    navigate('/customer/orders')
   }
 
   // Fetch menu items from API
@@ -143,8 +143,8 @@ export default function Menu() {
     <>
       <div className="menu-page">
       <div className="menu-header">
-        <div className="header-content">
-          <h1>🍽️ Our Menu</h1>
+        <div className="header-content" onClick={() => navigate('/')}>
+          <h1>🍽️ Food Court</h1>
           <p className="subtitle">Explore our delicious offerings</p>
         </div>
         <div className="menu-actions">

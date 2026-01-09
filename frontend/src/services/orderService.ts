@@ -41,7 +41,7 @@ export interface Order {
   total: number;
   paymentMethod: 'card' | 'cash';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'delivered' | 'completed' | 'cancelled';
   specialNotes?: string;
   orderedAt: string;
   confirmedAt?: string;

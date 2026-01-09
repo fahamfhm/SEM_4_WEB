@@ -48,15 +48,13 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      // Since we don't have a users endpoint, we'll show current user and mock data
-      const response = await api.get('/auth/me');
-      const currentUser = response.data.data;
-      
-      // Add current user to list (in real app, would fetch all users)
-      setUsers([currentUser]);
-    } catch (err: any) {
-      console.error('Error fetching users:', err);
-      setError(err.response?.data?.error || 'Failed to load users');
+      // Fetch all users from backend
+      const response = await api.get('/auth/users');
+      setUsers(response.data.data || []);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      console.error('Error fetching users:', error);
+      setError(error.response?.data?.message || 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -65,6 +63,34 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  const handleRoleChange = async (userId: string, newRole: User['role']) => {
+    if (window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+      try {
+        await api.put(`/auth/users/${userId}/role`, { role: newRole });
+        alert('User role updated successfully!');
+        fetchUsers();
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        console.error('Error updating user role:', error);
+        alert(error.response?.data?.message || 'Failed to update user role');
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (window.confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+      try {
+        await api.delete(`/auth/users/${userId}`);
+        alert('User deleted successfully!');
+        fetchUsers();
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        console.error('Error deleting user:', error);
+        alert(error.response?.data?.message || 'Failed to delete user');
+      }
+    }
+  };
 
   const getRoleIcon = (role: User['role']) => {
     const icons: Record<User['role'], string> = {
@@ -245,22 +271,20 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="admin-users-td">
                     <div className="admin-users-actions">
-                      <button
-                        className="admin-users-action admin-users-action-view"
-                        title="View Details"
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user._id, e.target.value as User['role'])}
+                        className="admin-users-role-select"
+                        title="Change Role"
                       >
-                        👁️
-                      </button>
-                      <button
-                        className="admin-users-action admin-users-action-edit"
-                        title="Edit User"
-                      >
-                        ✏️
-                      </button>
+                        <option value="customer">Customer</option>
+                        <option value="kitchen">Kitchen</option>
+                        <option value="admin">Admin</option>
+                      </select>
                       <button
                         className="admin-users-action admin-users-action-delete"
                         title="Delete User"
-                        disabled={user.role === 'admin'}
+                        onClick={() => handleDeleteUser(user._id, user.name)}
                       >
                         🗑️
                       </button>
@@ -277,8 +301,7 @@ const UserManagement: React.FC = () => {
       <div className="admin-users-note">
         <span className="admin-users-note-icon">ℹ️</span>
         <span className="admin-users-note-text">
-          Note: Full user management features (edit, delete, etc.) would require additional backend endpoints.
-          Currently showing authenticated user data.
+          Use the dropdown to change user roles. Delete button removes users from the system permanently.
         </span>
       </div>
     </div>

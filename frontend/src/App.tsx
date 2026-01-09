@@ -24,6 +24,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import MenuManagement from "./pages/admin/MenuManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import Analytics from "./pages/admin/Analytics";
+import OrderManagement from "./pages/admin/OrderManagement";
 
 // Kitchen Pages
 import KitchenOrders from "./pages/kitchen/Orders";
@@ -57,6 +58,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="menu" element={<MenuManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="analytics" element={<Analytics />} />
             </Route>

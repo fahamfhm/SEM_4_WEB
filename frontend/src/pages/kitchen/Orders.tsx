@@ -5,7 +5,7 @@ import type { Order } from '../../services/orderService';
 import '../../styles/KitchenOrders.css';
 
 // Kitchen order status type matching database
-type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served';
+type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed';
 
 const KitchenOrders = () => {
   const navigate = useNavigate();
@@ -47,9 +47,9 @@ const KitchenOrders = () => {
       const result = await OrderService.getAllOrders({
         status: undefined, // Get all statuses
       });
-      // Filter to show only active orders (not completed or cancelled)
+      // Filter out only cancelled orders
       const activeOrders = result.orders.filter(
-        o => !['completed', 'cancelled'].includes(o.status)
+        o => o.status !== 'cancelled'
       );
       setOrders(activeOrders);
     } catch (err: unknown) {
@@ -80,18 +80,6 @@ const KitchenOrders = () => {
     }
   };
 
-  // Complete and remove order
-  const completeOrder = async (orderId: string) => {
-    try {
-      await OrderService.updateOrderStatus(orderId, 'served');
-      // Remove from list after marking as served
-      setOrders(prev => prev.filter(o => o._id !== orderId));
-    } catch (err) {
-      console.error('Error completing order:', err);
-      alert('Failed to complete order. Please try again.');
-    }
-  };
-
   // Load orders on mount and set up polling
   useEffect(() => {
     fetchOrders();
@@ -104,7 +92,7 @@ const KitchenOrders = () => {
 
   // Filter orders based on active filter
   const filteredOrders = activeFilter === 'all' 
-    ? orders 
+    ? orders.filter(order => order.status !== 'completed')
     : orders.filter(order => order.status === activeFilter);
 
   // Get time ago string
@@ -117,12 +105,13 @@ const KitchenOrders = () => {
 
   // Get counts for filter badges
   const getCounts = (): Record<FilterType, number> => ({
-    all: orders.length,
+    all: orders.filter(o => o.status !== 'completed').length,
     pending: orders.filter(o => o.status === 'pending').length,
     confirmed: orders.filter(o => o.status === 'confirmed').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
     ready: orders.filter(o => o.status === 'ready').length,
     served: orders.filter(o => o.status === 'served').length,
+    completed: orders.filter(o => o.status === 'completed').length,
   });
 
   const counts = getCounts();
@@ -204,7 +193,7 @@ const KitchenOrders = () => {
 
       {/* Filter Buttons */}
       <div className="kit-ord-filters">
-        {(['all', 'pending', 'confirmed', 'preparing', 'ready', 'served'] as FilterType[]).map(filter => (
+        {(['all', 'pending', 'confirmed', 'preparing', 'ready', 'served', 'delivered', 'completed'] as FilterType[]).map(filter => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
@@ -354,14 +343,14 @@ const KitchenOrders = () => {
                 )}
                 {order.status === 'ready' && (
                   <button
-                    className="kit-ord-btn kit-ord-btn-complete"
-                    onClick={() => completeOrder(order._id)}
+                    className="kit-ord-btn kit-ord-btn-serve"
+                    onClick={() => updateOrderStatus(order._id, 'served')}
                   >
                     <span className="kit-ord-btn-icon">
-                      {order.orderType === 'dine-in' ? '🍽️' : '🎉'}
+                      {order.orderType === 'dine-in' ? '🍽️' : '🚚'}
                     </span>
                     <span className="kit-ord-btn-text">
-                      {order.orderType === 'dine-in' ? 'Served' : 'Delivered'}
+                      {order.orderType === 'dine-in' ? 'Served' : 'Ready for Pickup'}
                     </span>
                   </button>
                 )}
@@ -373,6 +362,12 @@ const KitchenOrders = () => {
                     <span className="kit-ord-btn-icon">✅</span>
                     <span className="kit-ord-btn-text">Complete Order</span>
                   </button>
+                )}
+                {order.status === 'completed' && (
+                  <div className="kit-ord-completed-badge">
+                    <span className="kit-ord-completed-icon">🎉</span>
+                    <span className="kit-ord-completed-text">Order Completed</span>
+                  </div>
                 )}
               </div>
             </div>
