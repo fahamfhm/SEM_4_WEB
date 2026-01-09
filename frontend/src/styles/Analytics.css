@@ -463,10 +463,15 @@
   .admin-analytics-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1.5rem;
   }
 
   .admin-analytics-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .admin-analytics-subtitle {
+    font-size: 0.9rem;
   }
 
   .admin-analytics-filters {
@@ -476,20 +481,54 @@
 
   .admin-analytics-filter-btn {
     flex: 1;
-    min-width: 80px;
+    min-width: 70px;
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
   }
 
   .admin-analytics-stats {
     grid-template-columns: 1fr;
   }
 
+  .admin-analytics-stat-card {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .admin-analytics-stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+
+  .admin-analytics-stat-value {
+    font-size: 1.5rem;
+  }
+
+  .admin-analytics-section {
+    padding: 1.5rem;
+  }
+
+  .admin-analytics-section-title {
+    font-size: 1.25rem;
+  }
+
   .admin-analytics-chart {
-    height: 200px;
+    height: 180px;
     gap: 0.25rem;
   }
 
   .admin-analytics-bar-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+  }
+
+  .admin-analytics-item {
+    flex-wrap: wrap;
+    padding: 0.875rem;
+  }
+
+  .admin-analytics-item-stats {
+    min-width: 80px;
   }
 
   .admin-analytics-category {
@@ -500,5 +539,84 @@
 
   .admin-analytics-category-bar {
     width: 100%;
+  }
+
+  .admin-analytics-category-name {
+    min-width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .admin-analytics-category-amount {
+    min-width: 100%;
+    text-align: left;
+    margin-top: 0.25rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-analytics-container {
+    padding: 1rem;
+  }
+
+  .admin-analytics-header {
+    padding: 1.25rem;
+  }
+
+  .admin-analytics-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-analytics-filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    min-width: 60px;
+  }
+
+  .admin-analytics-stat-card {
+    padding: 1rem;
+  }
+
+  .admin-analytics-stat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.75rem;
+  }
+
+  .admin-analytics-stat-value {
+    font-size: 1.25rem;
+  }
+
+  .admin-analytics-stat-label {
+    font-size: 0.7rem;
+  }
+
+  .admin-analytics-section {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .admin-analytics-section-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-analytics-chart {
+    height: 150px;
+  }
+
+  .admin-analytics-item-rank {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
+    min-width: 35px;
+  }
+
+  .admin-analytics-item-name {
+    font-size: 0.9rem;
+  }
+
+  .admin-analytics-item-revenue {
+    font-size: 0.95rem;
   }
 }

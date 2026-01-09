@@ -466,18 +466,40 @@
   .admin-users-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1.5rem;
   }
 
   .admin-users-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .admin-users-subtitle {
+    font-size: 0.9rem;
   }
 
   .admin-users-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .admin-users-stat-card {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .admin-users-stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+
+  .admin-users-stat-value {
+    font-size: 1.5rem;
   }
 
   .admin-users-controls {
     flex-direction: column;
+    padding: 1.25rem;
   }
 
   .admin-users-search {
@@ -487,10 +509,15 @@
 
   .admin-users-filters {
     width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
   }
 
   .admin-users-filter-btn {
-    flex: 1;
+    flex-shrink: 0;
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
   }
 
   .admin-users-table th,
@@ -511,5 +538,90 @@
 
   .admin-users-user-email {
     font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-users-container {
+    padding: 1rem;
+  }
+
+  .admin-users-header {
+    padding: 1.25rem;
+  }
+
+  .admin-users-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-users-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-users-stat-card {
+    padding: 1rem;
+  }
+
+  .admin-users-stat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.75rem;
+  }
+
+  .admin-users-stat-value {
+    font-size: 1.25rem;
+  }
+
+  .admin-users-stat-label {
+    font-size: 0.7rem;
+  }
+
+  .admin-users-controls {
+    padding: 1rem;
+  }
+
+  .admin-users-search-input {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    font-size: 0.9rem;
+  }
+
+  .admin-users-filter-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+  }
+
+  .admin-users-table-container {
+    border-radius: 16px;
+  }
+
+  .admin-users-table {
+    min-width: 650px;
+  }
+
+  .admin-users-table th,
+  .admin-users-table td {
+    padding: 0.875rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-users-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .admin-users-role-badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .admin-users-role-select {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-users-action-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.7rem;
   }
 }
