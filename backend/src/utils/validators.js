@@ -22,16 +22,15 @@ export const createMenuItemValidation = [
     .withMessage("Name cannot exceed 100 characters"),
   
   body("description")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Description is required")
     .isLength({ max: 500 })
     .withMessage("Description cannot exceed 500 characters"),
   
   body("category")
     .notEmpty()
     .withMessage("Category is required")
-    .isIn(["Burgers", "Hot Dogs", "Drinks", "Desserts", "Sides", "Specials"])
+    .isIn(["Main Dishes", "Beverages", "Desserts", "Sides", "Specials"])
     .withMessage("Invalid category"),
   
   body("basePrice")
@@ -44,6 +43,16 @@ export const createMenuItemValidation = [
     .optional()
     .isBoolean()
     .withMessage("isVegetarian must be a boolean"),
+  
+  body("availability")
+    .optional()
+    .isObject()
+    .withMessage("availability must be an object"),
+  
+  body("availability.inStock")
+    .optional()
+    .isBoolean()
+    .withMessage("availability.inStock must be a boolean"),
   
   body("preparationTime")
     .optional()
@@ -69,13 +78,23 @@ export const updateMenuItemValidation = [
   
   body("category")
     .optional()
-    .isIn(["Burgers", "Hot Dogs", "Drinks", "Desserts", "Sides", "Specials"])
+    .isIn(["Main Dishes", "Beverages", "Desserts", "Sides", "Specials"])
     .withMessage("Invalid category"),
   
   body("basePrice")
     .optional()
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  
+  body("availability")
+    .optional()
+    .isObject()
+    .withMessage("availability must be an object"),
+  
+  body("availability.inStock")
+    .optional()
+    .isBoolean()
+    .withMessage("availability.inStock must be a boolean"),
   
   validate,
 ];

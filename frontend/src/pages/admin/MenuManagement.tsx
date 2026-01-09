@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import '../../styles/MenuManagement.css';
@@ -11,33 +11,61 @@ interface MenuItem {
   description?: string;
   image?: string;
   isVegetarian: boolean;
-  isAvailable: boolean;
+  isAvailable?: boolean; // Deprecated - kept for backward compatibility
+  availability?: {
+    inStock: boolean;
+    outOfStockReason?: string | null;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+type ViewMode = 'grid' | 'table';
 
 const MenuManagement: React.FC = () => {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastCounter = useRef(0);
   const [formData, setFormData] = useState({
     name: '',
     basePrice: '',
-    category: 'Burgers',
+    category: 'Main Dishes',
     description: '',
     image: '',
     isVegetarian: false,
     isAvailable: true
   });
 
+  // Toast notification helper
+  const showToast = useCallback((message: string, type: Toast['type'] = 'info') => {
+    const id = ++toastCounter.current;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     
     if (!token || !userStr) {
-      alert('Please login to access menu management');
+      showToast('Please login to access menu management', 'error');
       navigate('/auth/login');
       return;
     }
@@ -45,7 +73,7 @@ const MenuManagement: React.FC = () => {
     try {
       const user = JSON.parse(userStr);
       if (user.role !== 'admin') {
-        alert('Access denied. Admin role required.');
+        showToast('Access denied. Admin role required.', 'error');
         navigate('/');
         return;
       }
@@ -55,19 +83,27 @@ const MenuManagement: React.FC = () => {
     }
 
     fetchMenuItems();
-  }, [navigate]);
 
-  const fetchMenuItems = async () => {
+    // Real-time updates - refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchMenuItems(true);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [navigate, showToast]);
+
+  const fetchMenuItems = async (silent = false) => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await api.get('/menu/items');
+      if (!silent) setLoading(true);
+      const response = await api.get('/menu/items?limit=1000');
       setMenuItems(response.data.data || []);
     } catch (err: any) {
       console.error('Error fetching menu items:', err);
-      setError(err.response?.data?.error || 'Failed to load menu items');
+      if (!silent) {
+        showToast(err.response?.data?.error || 'Failed to load menu items', 'error');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -85,23 +121,44 @@ const MenuManagement: React.FC = () => {
     e.preventDefault();
     
     try {
-      const submitData = {
-        ...formData,
-        basePrice: parseFloat(formData.basePrice)
+      // Transform data to match backend schema
+      const submitData: any = {
+        name: formData.name,
+        basePrice: parseFloat(formData.basePrice),
+        category: formData.category,
+        isVegetarian: formData.isVegetarian,
+        availability: {
+          inStock: formData.isAvailable
+        }
       };
+
+      // Add optional fields if they exist
+      if (formData.description) {
+        submitData.description = formData.description;
+      }
+      if (formData.image) {
+        submitData.image = formData.image;
+      }
+
+      console.log('Submitting data:', submitData);
 
       if (editingId) {
         await api.put(`/menu/items/${editingId}`, submitData);
+        showToast('Menu item updated successfully!', 'success');
       } else {
         await api.post('/menu/items', submitData);
+        showToast('Menu item created successfully!', 'success');
       }
       
-      alert(`Menu item ${editingId ? 'updated' : 'created'} successfully!`);
       resetForm();
       fetchMenuItems();
     } catch (err: any) {
       console.error('Error saving menu item:', err);
-      alert(err.response?.data?.error || 'Error saving menu item');
+      console.error('Error details:', err.response?.data);
+      const errorMsg = err.response?.data?.errors 
+        ? err.response.data.errors.map((e: any) => e.msg).join(', ')
+        : err.response?.data?.error || err.response?.data?.message || 'Error saving menu item';
+      showToast(errorMsg, 'error');
     }
   };
 
@@ -113,22 +170,21 @@ const MenuManagement: React.FC = () => {
       description: item.description || '',
       image: item.image || '',
       isVegetarian: item.isVegetarian,
-      isAvailable: item.isAvailable
+      isAvailable: item.availability?.inStock ?? item.isAvailable ?? false
     });
     setEditingId(item._id);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setShowModal(true);
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         await api.delete(`/menu/items/${id}`);
-        alert('Menu item deleted successfully!');
+        showToast('Menu item deleted successfully!', 'success');
         fetchMenuItems();
       } catch (err: any) {
         console.error('Error deleting menu item:', err);
-        alert(err.response?.data?.error || 'Error deleting menu item');
+        showToast(err.response?.data?.error || 'Error deleting menu item', 'error');
       }
     }
   };
@@ -136,12 +192,13 @@ const MenuManagement: React.FC = () => {
   const toggleAvailability = async (id: string, currentStatus: boolean) => {
     try {
       await api.patch(`/menu/items/${id}/availability`, {
-        isAvailable: !currentStatus
+        inStock: !currentStatus
       });
-      fetchMenuItems();
+      showToast(`Item marked as ${!currentStatus ? 'available' : 'unavailable'}`, 'success');
+      fetchMenuItems(true);
     } catch (err: any) {
       console.error('Error updating availability:', err);
-      alert(err.response?.data?.error || 'Error updating availability');
+      showToast(err.response?.data?.error || 'Error updating availability', 'error');
     }
   };
 
@@ -149,26 +206,111 @@ const MenuManagement: React.FC = () => {
     setFormData({
       name: '',
       basePrice: '',
-      category: 'Burgers',
+      category: 'Main Dishes',
       description: '',
       image: '',
       isVegetarian: false,
       isAvailable: true
     });
     setEditingId(null);
-    setShowForm(false);
+    setShowModal(false);
   };
 
-  const categories = ['Burgers', 'Hot Dogs', 'Drinks', 'Desserts', 'Sides'];
-  const filteredItems = categoryFilter === 'all' 
-    ? menuItems 
-    : menuItems.filter(item => item.category === categoryFilter);
+  // Bulk operations
+  const handleBulkDelete = async () => {
+    if (selectedItems.size === 0) {
+      showToast('No items selected', 'info');
+      return;
+    }
+    if (window.confirm(`Delete ${selectedItems.size} selected items?`)) {
+      try {
+        await Promise.all(
+          Array.from(selectedItems).map(id => api.delete(`/menu/items/${id}`))
+        );
+        showToast(`${selectedItems.size} items deleted successfully!`, 'success');
+        setSelectedItems(new Set());
+        fetchMenuItems();
+      } catch (err: any) {
+        showToast('Error deleting some items', 'error');
+      }
+    }
+  };
+
+  const handleBulkToggleAvailability = async (available: boolean) => {
+    if (selectedItems.size === 0) {
+      showToast('No items selected', 'info');
+      return;
+    }
+    try {
+      await Promise.all(
+        Array.from(selectedItems).map(id => 
+          api.patch(`/menu/items/${id}/availability`, { inStock: available })
+        )
+      );
+      showToast(`${selectedItems.size} items marked as ${available ? 'available' : 'unavailable'}!`, 'success');
+      setSelectedItems(new Set());
+      fetchMenuItems();
+    } catch (err: any) {
+      showToast('Error updating some items', 'error');
+    }
+  };
+
+  const toggleSelectItem = (id: string) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedItems.size === filteredItems.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(filteredItems.map(item => item._id)));
+    }
+  };
+
+  const categories = ['Main Dishes', 'Beverages', 'Desserts', 'Sides', 'Specials'];
+  
+  // Enhanced filtering with search
+  const filteredItems = menuItems.filter(item => {
+    // Search filter
+    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    // Category filter
+    if (categoryFilter !== 'all' && item.category !== categoryFilter) {
+      return false;
+    }
+    // Availability filter
+    const isAvailable = item.availability?.inStock ?? item.isAvailable ?? false;
+    if (availabilityFilter === 'available' && !isAvailable) {
+      return false;
+    }
+    if (availabilityFilter === 'unavailable' && isAvailable) {
+      return false;
+    }
+    return true;
+  });
+
+  // Calculate stats
+  const stats = {
+    total: menuItems.length,
+    available: menuItems.filter(i => i.availability?.inStock ?? i.isAvailable ?? false).length,
+    unavailable: menuItems.filter(i => !(i.availability?.inStock ?? i.isAvailable ?? true)).length,
+    vegetarian: menuItems.filter(i => i.isVegetarian).length
+  };
 
   if (loading) {
     return (
-      <div className="admin-menu-container">
-        <div className="admin-menu-loading">
-          <div className="admin-menu-spinner"></div>
+      <div className="menu-mgmt-container">
+        <div className="menu-mgmt-loading">
+          <div className="menu-mgmt-spinner"></div>
           <p>Loading menu items...</p>
         </div>
       </div>
@@ -176,226 +318,257 @@ const MenuManagement: React.FC = () => {
   }
 
   return (
-    <div className="admin-menu-container">
+    <div className="menu-mgmt-container">
+      {/* Toast Notifications */}
+      <div className="menu-mgmt-toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`menu-mgmt-toast menu-mgmt-toast-${toast.type}`}>
+            <span className="menu-mgmt-toast-icon">
+              {toast.type === 'success' && '✓'}
+              {toast.type === 'error' && '✕'}
+              {toast.type === 'info' && 'ℹ'}
+            </span>
+            <span className="menu-mgmt-toast-message">{toast.message}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="admin-menu-header">
-        <div className="admin-menu-header-content">
-          <h1 className="admin-menu-title">🍽️ Menu Management</h1>
-          <p className="admin-menu-subtitle">Manage your restaurant menu items</p>
+      <div className="menu-mgmt-header">
+        <div className="menu-mgmt-header-left">
+          <h1 className="menu-mgmt-title">🍽️ Menu Management</h1>
+          <p className="menu-mgmt-subtitle">Manage your restaurant menu items</p>
         </div>
         <button 
           onClick={() => {
-            if (showForm) {
-              resetForm();
-            } else {
-              setShowForm(true);
-            }
+            resetForm();
+            setShowModal(true);
           }}
-          className={`admin-menu-btn-add ${showForm ? 'admin-menu-btn-cancel' : ''}`}
+          className="menu-mgmt-btn-add"
         >
-          {showForm ? '✕ Cancel' : '+ Add New Item'}
+          <span className="menu-mgmt-btn-icon">+</span>
+          Add New Item
         </button>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="admin-menu-error">
-          <span className="admin-menu-error-icon">⚠️</span>
-          <span>{error}</span>
-          <button onClick={fetchMenuItems} className="admin-menu-error-retry">Retry</button>
+      {/* Stats Dashboard */}
+      <div className="menu-mgmt-stats">
+        <div className="menu-mgmt-stat-card">
+          <div className="menu-mgmt-stat-icon menu-mgmt-stat-icon-total">📊</div>
+          <div className="menu-mgmt-stat-content">
+            <div className="menu-mgmt-stat-value">{stats.total}</div>
+            <div className="menu-mgmt-stat-label">Total Items</div>
+          </div>
         </div>
-      )}
-
-      {/* Form */}
-      {showForm && (
-        <div className="admin-menu-form-container">
-          <form onSubmit={handleSubmit} className="admin-menu-form">
-            <h2 className="admin-menu-form-title">
-              {editingId ? '✏️ Edit Menu Item' : '✨ Add New Menu Item'}
-            </h2>
-            
-            <div className="admin-menu-form-grid">
-              <div className="admin-menu-form-group">
-                <label className="admin-menu-label">Item Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="admin-menu-input"
-                  placeholder="Enter item name"
-                />
-              </div>
-
-              <div className="admin-menu-form-group">
-                <label className="admin-menu-label">Base Price (Rs.) *</label>
-                <input
-                  type="number"
-                  name="basePrice"
-                  value={formData.basePrice}
-                  onChange={handleInputChange}
-                  required
-                  step="0.01"
-                  min="0"
-                  className="admin-menu-input"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="admin-menu-form-group">
-                <label className="admin-menu-label">Category *</label>
-                <select 
-                  name="category" 
-                  value={formData.category} 
-                  onChange={handleInputChange}
-                  className="admin-menu-select"
-                >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="admin-menu-form-group admin-menu-full-width">
-                <label className="admin-menu-label">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="admin-menu-textarea"
-                  placeholder="Brief description of the item"
-                  rows={3}
-                />
-              </div>
-
-              <div className="admin-menu-form-group admin-menu-full-width">
-                <label className="admin-menu-label">Image URL</label>
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  className="admin-menu-input"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div className="admin-menu-form-checkboxes">
-                <label className="admin-menu-checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="isVegetarian"
-                    checked={formData.isVegetarian}
-                    onChange={handleInputChange}
-                    className="admin-menu-checkbox"
-                  />
-                  <span>🌱 Vegetarian</span>
-                </label>
-                <label className="admin-menu-checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="isAvailable"
-                    checked={formData.isAvailable}
-                    onChange={handleInputChange}
-                    className="admin-menu-checkbox"
-                  />
-                  <span>✅ Available</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="admin-menu-form-actions">
-              <button type="submit" className="admin-menu-btn-save">
-                {editingId ? '💾 Update Item' : '➕ Create Item'}
-              </button>
-              <button type="button" onClick={resetForm} className="admin-menu-btn-cancel-form">
-                Cancel
-              </button>
-            </div>
-          </form>
+        <div className="menu-mgmt-stat-card">
+          <div className="menu-mgmt-stat-icon menu-mgmt-stat-icon-available">✅</div>
+          <div className="menu-mgmt-stat-content">
+            <div className="menu-mgmt-stat-value">{stats.available}</div>
+            <div className="menu-mgmt-stat-label">Available</div>
+          </div>
         </div>
-      )}
+        <div className="menu-mgmt-stat-card">
+          <div className="menu-mgmt-stat-icon menu-mgmt-stat-icon-unavailable">❌</div>
+          <div className="menu-mgmt-stat-content">
+            <div className="menu-mgmt-stat-value">{stats.unavailable}</div>
+            <div className="menu-mgmt-stat-label">Unavailable</div>
+          </div>
+        </div>
+        <div className="menu-mgmt-stat-card">
+          <div className="menu-mgmt-stat-icon menu-mgmt-stat-icon-veg">🌱</div>
+          <div className="menu-mgmt-stat-content">
+            <div className="menu-mgmt-stat-value">{stats.vegetarian}</div>
+            <div className="menu-mgmt-stat-label">Vegetarian</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="menu-mgmt-controls">
+        <div className="menu-mgmt-search-bar">
+          <span className="menu-mgmt-search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search by item name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="menu-mgmt-search-input"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="menu-mgmt-search-clear"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <div className="menu-mgmt-view-toggle">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`menu-mgmt-view-btn ${viewMode === 'grid' ? 'menu-mgmt-view-btn-active' : ''}`}
+            title="Grid View"
+          >
+            ⊞
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`menu-mgmt-view-btn ${viewMode === 'table' ? 'menu-mgmt-view-btn-active' : ''}`}
+            title="Table View"
+          >
+            ☰
+          </button>
+        </div>
+      </div>
 
       {/* Category Filter */}
-      <div className="admin-menu-filters">
-        <button
-          onClick={() => setCategoryFilter('all')}
-          className={`admin-menu-filter ${categoryFilter === 'all' ? 'admin-menu-filter-active' : ''}`}
-        >
-          All ({menuItems.length})
-        </button>
-        {categories.map(category => {
-          const count = menuItems.filter(item => item.category === category).length;
-          return (
+      <div className="menu-mgmt-filters">
+        <div className="menu-mgmt-filter-group">
+          <button
+            onClick={() => setCategoryFilter('all')}
+            className={`menu-mgmt-filter-btn ${categoryFilter === 'all' ? 'menu-mgmt-filter-btn-active' : ''}`}
+          >
+            All Categories
+          </button>
+          {categories.map(category => (
             <button
               key={category}
               onClick={() => setCategoryFilter(category)}
-              className={`admin-menu-filter ${categoryFilter === category ? 'admin-menu-filter-active' : ''}`}
+              className={`menu-mgmt-filter-btn ${categoryFilter === category ? 'menu-mgmt-filter-btn-active' : ''}`}
             >
-              {category} ({count})
+              {category}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <div className="menu-mgmt-filter-group">
+          <button
+            onClick={() => setAvailabilityFilter('all')}
+            className={`menu-mgmt-filter-btn ${availabilityFilter === 'all' ? 'menu-mgmt-filter-btn-active' : ''}`}
+          >
+            All Status
+          </button>
+          <button
+            onClick={() => setAvailabilityFilter('available')}
+            className={`menu-mgmt-filter-btn ${availabilityFilter === 'available' ? 'menu-mgmt-filter-btn-active' : ''}`}
+          >
+            Available Only
+          </button>
+          <button
+            onClick={() => setAvailabilityFilter('unavailable')}
+            className={`menu-mgmt-filter-btn ${availabilityFilter === 'unavailable' ? 'menu-mgmt-filter-btn-active' : ''}`}
+          >
+            Unavailable Only
+          </button>
+        </div>
       </div>
 
-      {/* Items Grid */}
+      {/* Bulk Actions Bar */}
+      {selectedItems.size > 0 && (
+        <div className="menu-mgmt-bulk-bar">
+          <div className="menu-mgmt-bulk-info">
+            <input
+              type="checkbox"
+              checked={selectedItems.size === filteredItems.length}
+              onChange={toggleSelectAll}
+              className="menu-mgmt-checkbox"
+            />
+            <span>{selectedItems.size} item(s) selected</span>
+          </div>
+          <div className="menu-mgmt-bulk-actions">
+            <button
+              onClick={() => handleBulkToggleAvailability(true)}
+              className="menu-mgmt-bulk-btn menu-mgmt-bulk-btn-available"
+            >
+              Mark Available
+            </button>
+            <button
+              onClick={() => handleBulkToggleAvailability(false)}
+              className="menu-mgmt-bulk-btn menu-mgmt-bulk-btn-unavailable"
+            >
+              Mark Unavailable
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="menu-mgmt-bulk-btn menu-mgmt-bulk-btn-delete"
+            >
+              Delete Selected
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
       {filteredItems.length === 0 ? (
-        <div className="admin-menu-empty">
-          <div className="admin-menu-empty-icon">🍽️</div>
-          <p className="admin-menu-empty-text">
-            No menu items found. {categoryFilter !== 'all' && 'Try a different category or '}
-            Add your first item to get started!
+        <div className="menu-mgmt-empty">
+          <div className="menu-mgmt-empty-icon">🍽️</div>
+          <h2 className="menu-mgmt-empty-title">No menu items found</h2>
+          <p className="menu-mgmt-empty-text">
+            {searchQuery || categoryFilter !== 'all' || availabilityFilter !== 'all'
+              ? 'Try adjusting your filters'
+              : 'Add your first menu item to get started!'}
           </p>
         </div>
-      ) : (
-        <div className="admin-menu-grid">
+      ) : viewMode === 'grid' ? (
+        <div className="menu-mgmt-grid">
           {filteredItems.map(item => (
-            <div key={item._id} className={`admin-menu-card ${!item.isAvailable ? 'admin-menu-card-unavailable' : ''}`}>
-              {item.image && (
-                <div className="admin-menu-card-image">
+            <div key={item._id} className="menu-mgmt-card">
+              <div className="menu-mgmt-card-select">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.has(item._id)}
+                  onChange={() => toggleSelectItem(item._id)}
+                  className="menu-mgmt-checkbox"
+                />
+              </div>
+              {item.image ? (
+                <div className="menu-mgmt-card-image">
                   <img src={item.image} alt={item.name} />
-                  {!item.isAvailable && (
-                    <div className="admin-menu-card-overlay">Out of Stock</div>
+                  {!(item.availability?.inStock ?? item.isAvailable ?? false) && (
+                    <div className="menu-mgmt-card-overlay">Unavailable</div>
                   )}
+                </div>
+              ) : (
+                <div className="menu-mgmt-card-placeholder">
+                  <span>🍽️</span>
                 </div>
               )}
-              <div className="admin-menu-card-content">
-                <h3 className="admin-menu-card-title">{item.name}</h3>
+              <div className="menu-mgmt-card-content">
+                <h3 className="menu-mgmt-card-title">{item.name}</h3>
                 {item.description && (
-                  <p className="admin-menu-card-description">{item.description}</p>
+                  <p className="menu-mgmt-card-description">{item.description}</p>
                 )}
-                <div className="admin-menu-card-meta">
-                  <span className="admin-menu-card-category">{item.category}</span>
-                  <span className="admin-menu-card-price">Rs. {item.basePrice.toFixed(2)}</span>
+                <div className="menu-mgmt-card-meta">
+                  <span className="menu-mgmt-card-category">{item.category}</span>
+                  <span className="menu-mgmt-card-price">Rs. {item.basePrice.toFixed(2)}</span>
                 </div>
-                <div className="admin-menu-card-badges">
+                <div className="menu-mgmt-card-badges">
                   {item.isVegetarian && (
-                    <span className="admin-menu-badge admin-menu-badge-veg">🌱 Veg</span>
+                    <span className="menu-mgmt-badge menu-mgmt-badge-veg">🌱 Veg</span>
                   )}
-                  <span className={`admin-menu-badge ${item.isAvailable ? 'admin-menu-badge-available' : 'admin-menu-badge-unavailable'}`}>
-                    {item.isAvailable ? '✅ Available' : '❌ Unavailable'}
+                  <span className={`menu-mgmt-badge ${(item.availability?.inStock ?? item.isAvailable ?? false) ? 'menu-mgmt-badge-available' : 'menu-mgmt-badge-unavailable'}`}>
+                    {(item.availability?.inStock ?? item.isAvailable ?? false) ? '✅ Available' : '❌ Unavailable'}
                   </span>
                 </div>
               </div>
-              <div className="admin-menu-card-actions">
+              <div className="menu-mgmt-card-actions">
                 <button
-                  onClick={() => toggleAvailability(item._id, item.isAvailable)}
-                  className={`admin-menu-action ${item.isAvailable ? 'admin-menu-action-disable' : 'admin-menu-action-enable'}`}
-                  title={item.isAvailable ? 'Mark Unavailable' : 'Mark Available'}
+                  onClick={() => toggleAvailability(item._id, item.availability?.inStock ?? item.isAvailable ?? false)}
+                  className="menu-mgmt-card-btn menu-mgmt-card-btn-toggle"
+                  title="Toggle Availability"
                 >
-                  {item.isAvailable ? '🚫' : '✅'}
+                  {(item.availability?.inStock ?? item.isAvailable ?? false) ? '🚫' : '✅'}
                 </button>
                 <button
                   onClick={() => handleEdit(item)}
-                  className="admin-menu-action admin-menu-action-edit"
+                  className="menu-mgmt-card-btn menu-mgmt-card-btn-edit"
                   title="Edit"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => handleDelete(item._id)}
-                  className="admin-menu-action admin-menu-action-delete"
+                  className="menu-mgmt-card-btn menu-mgmt-card-btn-delete"
                   title="Delete"
                 >
                   🗑️
@@ -403,6 +576,200 @@ const MenuManagement: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="menu-mgmt-table-container">
+          <table className="menu-mgmt-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.size === filteredItems.length && filteredItems.length > 0}
+                    onChange={toggleSelectAll}
+                    className="menu-mgmt-checkbox"
+                  />
+                </th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map(item => (
+                <tr key={item._id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(item._id)}
+                      onChange={() => toggleSelectItem(item._id)}
+                      className="menu-mgmt-checkbox"
+                    />
+                  </td>
+                  <td>
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="menu-mgmt-table-img" />
+                    ) : (
+                      <div className="menu-mgmt-table-placeholder">🍽️</div>
+                    )}
+                  </td>
+                  <td className="menu-mgmt-table-name">{item.name}</td>
+                  <td>
+                    <span className="menu-mgmt-table-category">{item.category}</span>
+                  </td>
+                  <td className="menu-mgmt-table-price">Rs. {item.basePrice.toFixed(2)}</td>
+                  <td>
+                    <span className={`menu-mgmt-badge ${(item.availability?.inStock ?? item.isAvailable ?? false) ? 'menu-mgmt-badge-available' : 'menu-mgmt-badge-unavailable'}`}>
+                      {(item.availability?.inStock ?? item.isAvailable ?? false) ? 'Available' : 'Unavailable'}
+                    </span>
+                  </td>
+                  <td>
+                    {item.isVegetarian && (
+                      <span className="menu-mgmt-badge menu-mgmt-badge-veg">🌱 Veg</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="menu-mgmt-table-actions">
+                      <button
+                        onClick={() => toggleAvailability(item._id, item.availability?.inStock ?? item.isAvailable ?? false)}
+                        className="menu-mgmt-table-btn menu-mgmt-table-btn-toggle"
+                        title="Toggle"
+                      >
+                        {(item.availability?.inStock ?? item.isAvailable ?? false) ? '🚫' : '✅'}
+                      </button>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="menu-mgmt-table-btn menu-mgmt-table-btn-edit"
+                        title="Edit"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="menu-mgmt-table-btn menu-mgmt-table-btn-delete"
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal Form */}
+      {showModal && (
+        <div className="menu-mgmt-modal-overlay" onClick={resetForm}>
+          <div className="menu-mgmt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="menu-mgmt-modal-header">
+              <h2 className="menu-mgmt-modal-title">
+                {editingId ? '✏️ Edit Menu Item' : '✨ Add New Item'}
+              </h2>
+              <button onClick={resetForm} className="menu-mgmt-modal-close">✕</button>
+            </div>
+            <form onSubmit={handleSubmit} className="menu-mgmt-modal-form">
+              <div className="menu-mgmt-form-grid">
+                <div className="menu-mgmt-form-group">
+                  <label className="menu-mgmt-label">Item Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="menu-mgmt-input"
+                    placeholder="Enter item name"
+                  />
+                </div>
+                <div className="menu-mgmt-form-group">
+                  <label className="menu-mgmt-label">Base Price (Rs.) *</label>
+                  <input
+                    type="number"
+                    name="basePrice"
+                    value={formData.basePrice}
+                    onChange={handleInputChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="menu-mgmt-input"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="menu-mgmt-form-group">
+                  <label className="menu-mgmt-label">Category *</label>
+                  <select 
+                    name="category" 
+                    value={formData.category} 
+                    onChange={handleInputChange}
+                    className="menu-mgmt-select"
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="menu-mgmt-form-group">
+                  <label className="menu-mgmt-label">Image URL</label>
+                  <input
+                    type="url"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
+                    className="menu-mgmt-input"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+                <div className="menu-mgmt-form-group menu-mgmt-form-full">
+                  <label className="menu-mgmt-label">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className="menu-mgmt-textarea"
+                    placeholder="Brief description of the item"
+                    rows={3}
+                  />
+                </div>
+                <div className="menu-mgmt-form-checkboxes">
+                  <label className="menu-mgmt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="isVegetarian"
+                      checked={formData.isVegetarian}
+                      onChange={handleInputChange}
+                      className="menu-mgmt-checkbox"
+                    />
+                    <span>🌱 Vegetarian</span>
+                  </label>
+                  <label className="menu-mgmt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="isAvailable"
+                      checked={formData.isAvailable}
+                      onChange={handleInputChange}
+                      className="menu-mgmt-checkbox"
+                    />
+                    <span>✅ Available</span>
+                  </label>
+                </div>
+              </div>
+              <div className="menu-mgmt-modal-actions">
+                <button type="submit" className="menu-mgmt-btn-save">
+                  {editingId ? '💾 Update Item' : '➕ Create Item'}
+                </button>
+                <button type="button" onClick={resetForm} className="menu-mgmt-btn-cancel">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

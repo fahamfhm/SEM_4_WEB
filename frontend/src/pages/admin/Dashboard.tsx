@@ -63,13 +63,15 @@ const AdminDashboard: React.FC = () => {
       setError(null);
 
       // Fetch all data in parallel
-      const [ordersRes, menuRes] = await Promise.all([
+      const [ordersRes, menuRes, usersRes] = await Promise.all([
         api.get('/orders/admin/all'),
-        api.get('/menu/items')
+        api.get('/menu/items'),
+        api.get('/auth/users')
       ]);
 
-      const orders = ordersRes.data.orders || [];
+      const orders = ordersRes.data.data || [];
       const menuItems = menuRes.data.data || [];
+      const users = usersRes.data.data || [];
 
       // Calculate stats
       const totalRevenue = orders.reduce((sum: number, order: any) => {
@@ -98,7 +100,7 @@ const AdminDashboard: React.FC = () => {
       setStats({
         totalOrders: orders.length,
         totalRevenue,
-        totalUsers: 0, // Would need user endpoint
+        totalUsers: users.length,
         totalMenuItems: menuItems.length,
         recentOrders,
         ordersByStatus
