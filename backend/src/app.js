@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import menuRoutes from "./routes/menuRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import inventoryRoutes from "./routes/inventoryRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -49,6 +50,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);
