@@ -32,9 +32,10 @@ const OrderHistory: React.FC = () => {
         
         setOrders(fetchedOrders);
         setError('');
-      } catch (err: any) {
-        console.error('Error fetching order history:', err);
-        setError(err.response?.data?.error || 'Failed to load order history');
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: string } } };
+        console.error('Error fetching order history:', error);
+        setError(error.response?.data?.error || 'Failed to load order history');
         setOrders([]);
       } finally {
         setLoading(false);

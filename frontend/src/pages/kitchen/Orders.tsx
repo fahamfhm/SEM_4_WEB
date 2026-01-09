@@ -5,7 +5,7 @@ import type { Order } from '../../services/orderService';
 import '../../styles/KitchenOrders.css';
 
 // Kitchen order status type matching database
-type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'delivered' | 'completed';
+type FilterType = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed';
 
 const KitchenOrders = () => {
   const navigate = useNavigate();
@@ -80,18 +80,6 @@ const KitchenOrders = () => {
     }
   };
 
-  // Complete and remove order
-  const completeOrder = async (orderId: string) => {
-    try {
-      await OrderService.updateOrderStatus(orderId, 'served');
-      // Remove from list after marking as served
-      setOrders(prev => prev.filter(o => o._id !== orderId));
-    } catch (err) {
-      console.error('Error completing order:', err);
-      alert('Failed to complete order. Please try again.');
-    }
-  };
-
   // Load orders on mount and set up polling
   useEffect(() => {
     fetchOrders();
@@ -123,7 +111,6 @@ const KitchenOrders = () => {
     preparing: orders.filter(o => o.status === 'preparing').length,
     ready: orders.filter(o => o.status === 'ready').length,
     served: orders.filter(o => o.status === 'served').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
     completed: orders.filter(o => o.status === 'completed').length,
   });
 
@@ -357,17 +344,17 @@ const KitchenOrders = () => {
                 {order.status === 'ready' && (
                   <button
                     className="kit-ord-btn kit-ord-btn-serve"
-                    onClick={() => updateOrderStatus(order._id, order.orderType === 'dine-in' ? 'served' : 'delivered')}
+                    onClick={() => updateOrderStatus(order._id, 'served')}
                   >
                     <span className="kit-ord-btn-icon">
                       {order.orderType === 'dine-in' ? '🍽️' : '🚚'}
                     </span>
                     <span className="kit-ord-btn-text">
-                      {order.orderType === 'dine-in' ? 'Served' : 'Delivered'}
+                      {order.orderType === 'dine-in' ? 'Served' : 'Ready for Pickup'}
                     </span>
                   </button>
                 )}
-                {(order.status === 'served' || order.status === 'delivered') && (
+                {order.status === 'served' && (
                   <button
                     className="kit-ord-btn kit-ord-btn-done"
                     onClick={() => updateOrderStatus(order._id, 'completed')}

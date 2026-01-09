@@ -60,6 +60,22 @@ const MenuManagement: React.FC = () => {
     }, 4000);
   }, []);
 
+  const fetchMenuItems = useCallback(async (silent = false) => {
+    try {
+      if (!silent) setLoading(true);
+      const response = await api.get('/menu/items?limit=1000');
+      setMenuItems(response.data.data || []);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      console.error('Error fetching menu items:', err);
+      if (!silent) {
+        showToast(error.response?.data?.error || 'Failed to load menu items', 'error');
+      }
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, [showToast]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
@@ -90,22 +106,7 @@ const MenuManagement: React.FC = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [navigate, showToast]);
-
-  const fetchMenuItems = async (silent = false) => {
-    try {
-      if (!silent) setLoading(true);
-      const response = await api.get('/menu/items?limit=1000');
-      setMenuItems(response.data.data || []);
-    } catch (err: any) {
-      console.error('Error fetching menu items:', err);
-      if (!silent) {
-        showToast(err.response?.data?.error || 'Failed to load menu items', 'error');
-      }
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  };
+  }, [navigate, showToast, fetchMenuItems]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -122,7 +123,7 @@ const MenuManagement: React.FC = () => {
     
     try {
       // Transform data to match backend schema
-      const submitData: any = {
+      const submitData: Record<string, unknown> = {
         name: formData.name,
         basePrice: parseFloat(formData.basePrice),
         category: formData.category,
@@ -152,12 +153,13 @@ const MenuManagement: React.FC = () => {
       
       resetForm();
       fetchMenuItems();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { errors?: Array<{ msg: string }>; error?: string; message?: string } } };
       console.error('Error saving menu item:', err);
-      console.error('Error details:', err.response?.data);
-      const errorMsg = err.response?.data?.errors 
-        ? err.response.data.errors.map((e: any) => e.msg).join(', ')
-        : err.response?.data?.error || err.response?.data?.message || 'Error saving menu item';
+      console.error('Error details:', error.response?.data);
+      const errorMsg = error.response?.data?.errors 
+        ? error.response.data.errors.map((e) => e.msg).join(', ')
+        : error.response?.data?.error || error.response?.data?.message || 'Error saving menu item';
       showToast(errorMsg, 'error');
     }
   };
@@ -182,9 +184,10 @@ const MenuManagement: React.FC = () => {
         await api.delete(`/menu/items/${id}`);
         showToast('Menu item deleted successfully!', 'success');
         fetchMenuItems();
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: string } } };
         console.error('Error deleting menu item:', err);
-        showToast(err.response?.data?.error || 'Error deleting menu item', 'error');
+        showToast(error.response?.data?.error || 'Error deleting menu item', 'error');
       }
     }
   };
@@ -196,9 +199,10 @@ const MenuManagement: React.FC = () => {
       });
       showToast(`Item marked as ${!currentStatus ? 'available' : 'unavailable'}`, 'success');
       fetchMenuItems(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
       console.error('Error updating availability:', err);
-      showToast(err.response?.data?.error || 'Error updating availability', 'error');
+      showToast(error.response?.data?.error || 'Error updating availability', 'error');
     }
   };
 
@@ -230,7 +234,7 @@ const MenuManagement: React.FC = () => {
         showToast(`${selectedItems.size} items deleted successfully!`, 'success');
         setSelectedItems(new Set());
         fetchMenuItems();
-      } catch (err: any) {
+      } catch {
         showToast('Error deleting some items', 'error');
       }
     }
@@ -250,7 +254,7 @@ const MenuManagement: React.FC = () => {
       showToast(`${selectedItems.size} items marked as ${available ? 'available' : 'unavailable'}!`, 'success');
       setSelectedItems(new Set());
       fetchMenuItems();
-    } catch (err: any) {
+    } catch {
       showToast('Error updating some items', 'error');
     }
   };
@@ -471,8 +475,7 @@ const MenuManagement: React.FC = () => {
               type="checkbox"
               checked={selectedItems.size === filteredItems.length}
               onChange={toggleSelectAll}
-              className="menu-mgmt-checkbox"
-            />
+              className="menu-mgmt-checkbox"              aria-label="Select all items"            />
             <span>{selectedItems.size} item(s) selected</span>
           </div>
           <div className="menu-mgmt-bulk-actions">
@@ -519,6 +522,7 @@ const MenuManagement: React.FC = () => {
                   checked={selectedItems.has(item._id)}
                   onChange={() => toggleSelectItem(item._id)}
                   className="menu-mgmt-checkbox"
+                  aria-label={`Select ${item.name}`}
                 />
               </div>
               {item.image ? (
@@ -588,6 +592,7 @@ const MenuManagement: React.FC = () => {
                     checked={selectedItems.size === filteredItems.length && filteredItems.length > 0}
                     onChange={toggleSelectAll}
                     className="menu-mgmt-checkbox"
+                    aria-label="Select all items"
                   />
                 </th>
                 <th>Image</th>
@@ -608,6 +613,7 @@ const MenuManagement: React.FC = () => {
                       checked={selectedItems.has(item._id)}
                       onChange={() => toggleSelectItem(item._id)}
                       className="menu-mgmt-checkbox"
+                      aria-label={`Select ${item.name}`}
                     />
                   </td>
                   <td>
@@ -709,6 +715,7 @@ const MenuManagement: React.FC = () => {
                     value={formData.category} 
                     onChange={handleInputChange}
                     className="menu-mgmt-select"
+                    aria-label="Select category"
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>

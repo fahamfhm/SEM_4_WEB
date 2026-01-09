@@ -51,9 +51,10 @@ const UserManagement: React.FC = () => {
       // Fetch all users from backend
       const response = await api.get('/auth/users');
       setUsers(response.data.data || []);
-    } catch (err: any) {
-      console.error('Error fetching users:', err);
-      setError(err.response?.data?.message || 'Failed to load users');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      console.error('Error fetching users:', error);
+      setError(error.response?.data?.message || 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -69,9 +70,10 @@ const UserManagement: React.FC = () => {
         await api.put(`/auth/users/${userId}/role`, { role: newRole });
         alert('User role updated successfully!');
         fetchUsers();
-      } catch (err: any) {
-        console.error('Error updating user role:', err);
-        alert(err.response?.data?.message || 'Failed to update user role');
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        console.error('Error updating user role:', error);
+        alert(error.response?.data?.message || 'Failed to update user role');
       }
     }
   };
@@ -82,9 +84,10 @@ const UserManagement: React.FC = () => {
         await api.delete(`/auth/users/${userId}`);
         alert('User deleted successfully!');
         fetchUsers();
-      } catch (err: any) {
-        console.error('Error deleting user:', err);
-        alert(err.response?.data?.message || 'Failed to delete user');
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        console.error('Error deleting user:', error);
+        alert(error.response?.data?.message || 'Failed to delete user');
       }
     }
   };

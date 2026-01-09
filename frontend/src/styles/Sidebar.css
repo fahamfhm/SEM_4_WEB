@@ -299,6 +299,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
   }
   
