@@ -26,6 +26,10 @@ interface MenuItemData {
   image: string
   category: string
   isVegetarian: boolean
+  availability?: {
+    inStock: boolean
+    outOfStockReason?: string | null
+  }
   customizationGroups: CustomizationGroup[]
 }
 
@@ -65,7 +69,11 @@ export default function Menu() {
       try {
         setLoading(true)
         const response = await axios.get(`${API_BASE_URL}/menu/items?limit=100`)
-        setMenuItems(response.data.data || [])
+        // Filter to show only in-stock items
+        const inStockItems = (response.data.data || []).filter((item: MenuItemData) => 
+          item.availability?.inStock !== false
+        )
+        setMenuItems(inStockItems)
         setError('')
       } catch (err) {
         console.error('Error fetching menu items:', err)
