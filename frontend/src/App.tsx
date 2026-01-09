@@ -28,6 +28,7 @@ import Analytics from "./pages/admin/Analytics";
 // Kitchen Pages
 import KitchenOrders from "./pages/kitchen/Orders";
 import KitchenInventory from "./pages/kitchen/Inventory";
+import MenuAvailability from "./pages/kitchen/MenuAvailability";
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="/kitchen" element={<KitchenLayout />}>
               <Route path="orders" element={<KitchenOrders />} />
               <Route path="inventory" element={<KitchenInventory />} />
+              <Route path="menu-availability" element={<MenuAvailability />} />
             </Route>
 
             {/* Customer Routes (Logged In) */}
