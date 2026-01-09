@@ -19,8 +19,10 @@ const navLinks = {
     { to: "/admin/settings", label: "Settings" },
   ],
   kitchen: [
+    { to: "/", label: "🏠 Home" },
     { to: "/kitchen/orders", label: "Orders" },
     { to: "/kitchen/inventory", label: "Inventory" },
+    { to: "/kitchen/menu-availability", label: "Menu Availability" },
   ]
 };
 
