@@ -894,11 +894,15 @@
 
   .or-man-ad-filters {
     gap: 0.5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
   }
 
   .or-man-ad-filter-btn {
     padding: 0.625rem 1rem;
     font-size: 0.8rem;
+    flex-shrink: 0;
   }
 
   .or-man-ad-table-wrapper {
@@ -906,7 +910,7 @@
   }
 
   .or-man-ad-table {
-    min-width: 1000px;
+    min-width: 900px;
   }
 }
 
@@ -917,6 +921,8 @@
 
   .or-man-ad-header {
     padding: 1.5rem;
+    flex-direction: column;
+    text-align: center;
   }
 
   .or-man-ad-title {
@@ -927,6 +933,11 @@
     font-size: 0.9rem;
   }
 
+  .or-man-ad-refresh {
+    width: 100%;
+    justify-content: center;
+  }
+
   .or-man-ad-stats {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -934,6 +945,16 @@
 
   .or-man-ad-stat-card {
     padding: 1.25rem;
+  }
+
+  .or-man-ad-stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+
+  .or-man-ad-stat-value {
+    font-size: 1.5rem;
   }
 
   .or-man-ad-search-wrapper {
@@ -950,9 +971,14 @@
     font-size: 0.75rem;
   }
 
+  .or-man-ad-table {
+    min-width: 800px;
+  }
+
   .or-man-ad-modal {
     max-height: 95vh;
     border-radius: 16px;
+    margin: 1rem;
   }
 
   .or-man-ad-modal-header,
@@ -980,30 +1006,67 @@
   }
 
   .or-man-ad-header {
-    padding: 1rem;
+    padding: 1.25rem;
   }
 
   .or-man-ad-title {
     font-size: 1.5rem;
   }
 
+  .or-man-ad-refresh {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
   .or-man-ad-refresh-text {
     display: none;
   }
 
+  .or-man-ad-stat-card {
+    padding: 1rem;
+  }
+
+  .or-man-ad-stat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.75rem;
+  }
+
   .or-man-ad-stat-value {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .or-man-ad-stat-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .or-man-ad-filters {
     padding: 0.75rem;
   }
 
+  .or-man-ad-filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .or-man-ad-table {
+    min-width: 700px;
+  }
+
   .or-man-ad-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .or-man-ad-modal {
+    border-radius: 12px;
+  }
+
+  .or-man-ad-modal-header,
+  .or-man-ad-modal-content {
     padding: 1rem;
+  }
+
+  .or-man-ad-modal-title {
+    font-size: 1.25rem;
   }
 }

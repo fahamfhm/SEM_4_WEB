@@ -15,6 +15,7 @@
   flex: 1;
   min-height: 100vh;
   padding: 2rem;
+  padding-right: 110px; /* Space for sidebar on desktop */
   background-color: var(--bg-light);
 }
 
@@ -29,6 +30,7 @@
 @media (max-width: 1024px) {
   .admin-main {
     padding: 1.5rem;
+    padding-right: 100px; /* Smaller sidebar space */
   }
 }
 
@@ -36,5 +38,14 @@
   .admin-main {
     margin-left: 0;
     padding: 1.5rem 1rem;
+    padding-right: 1rem; /* No sidebar space needed */
+    padding-bottom: 80px; /* Space for bottom navigation */
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main {
+    padding: 1rem;
+    padding-bottom: 70px; /* Space for bottom navigation */
   }
 }
