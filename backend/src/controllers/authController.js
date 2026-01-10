@@ -5,7 +5,7 @@ import User from "../models/User.js";
 // @access  Public
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, phone, password, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -16,13 +16,24 @@ export const register = async (req, res, next) => {
       });
     }
 
+    // Validate phone number
+    if (!phone || phone.length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid phone number",
+      });
+    }
+
     // Create user
     const user = await User.create({
       name,
       email,
+      phone,
       password,
       role: role || "customer", // Default to customer if not specified
     });
+
+    console.log('User created with phone:', user.phone);
 
     // Generate token and send response
     sendTokenResponse(user, 201, res);
@@ -313,6 +324,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone,
     },
   });
 };

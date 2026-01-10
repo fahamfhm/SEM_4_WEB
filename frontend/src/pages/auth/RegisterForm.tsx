@@ -14,6 +14,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -54,6 +55,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
       return;
     }
 
+    if (!formData.phone || formData.phone.length < 10) {
+      setError('Please provide a valid phone number (at least 10 digits)');
+      return;
+    }
+
     if (!agreeTerms) {
       setError('Please agree to the terms and conditions');
       return;
@@ -62,7 +68,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
     setIsLoading(true);
 
     try {
-      await register(formData.name, formData.email, formData.password);
+      await register(formData.name, formData.email, formData.phone, formData.password);
       
       // Redirect based on user role after successful registration
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -89,15 +95,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
       </div>
 
       {error && (
-        <div className="form-error" style={{ 
-          padding: '12px', 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid #ef4444',
-          borderRadius: '8px',
-          color: '#ef4444',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
+        <div className="form-error">
           {error}
         </div>
       )}
@@ -126,6 +124,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
           disabled={isLoading}
         />
         <label htmlFor="register-email">Email Address</label>
+      </div>
+
+      <div className="form-group">
+        <input 
+          type="tel" 
+          id="register-phone" 
+          required 
+          placeholder=" " 
+          value={formData.phone}
+          onChange={handleChange}
+          disabled={isLoading}
+          pattern="[0-9]{10,15}"
+          title="Please enter a valid phone number (10-15 digits)"
+        />
+        <label htmlFor="register-phone">Mobile Number</label>
       </div>
 
       <div className="form-group">

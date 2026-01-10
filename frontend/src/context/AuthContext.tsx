@@ -6,7 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role?: string) => Promise<void>;
+  register: (name: string, email: string, phone: string, password: string, role?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
 }
@@ -41,10 +41,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(response.user);
   };
 
-  const register = async (name: string, email: string, password: string, role?: string) => {
+  const register = async (name: string, email: string, phone: string, password: string, role?: string) => {
     const response = await authService.register({ 
       name, 
-      email, 
+      email,
+      phone, 
       password, 
       role: role as 'customer' | 'admin' | 'kitchen' 
     });
