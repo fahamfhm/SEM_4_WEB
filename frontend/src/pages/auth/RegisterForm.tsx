@@ -95,15 +95,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle }) => {
       </div>
 
       {error && (
-        <div className="form-error" style={{ 
-          padding: '12px', 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid #ef4444',
-          borderRadius: '8px',
-          color: '#ef4444',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
+        <div className="form-error">
           {error}
         </div>
       )}

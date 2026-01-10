@@ -192,7 +192,7 @@ const UserManagement: React.FC = () => {
           <h1 className="admin-users-title">👥 User Management</h1>
           <p className="admin-users-subtitle">Manage all registered users</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="admin-users-header-buttons">
           <button onClick={() => setShowAddModal(true)} className="admin-users-add-btn">
             ➕ Add User
           </button>
@@ -417,6 +417,7 @@ const UserManagement: React.FC = () => {
               <div className="admin-users-form-group">
                 <label>Role *</label>
                 <select
+                  aria-label="User role"
                   value={addUserForm.role}
                   onChange={(e) => setAddUserForm({...addUserForm, role: e.target.value as User['role']})}
                   disabled={addUserLoading}

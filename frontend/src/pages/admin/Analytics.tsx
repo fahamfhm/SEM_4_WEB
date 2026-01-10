@@ -56,6 +56,22 @@ const Analytics: React.FC = () => {
       const ordersRes = await api.get('/orders/admin/all');
       const orders = ordersRes.data.data || [];
 
+      // Fetch menu items to get category information
+      let menuItems: any[] = [];
+      let menuItemMap: Record<string, any> = {};
+      
+      try {
+        const menuRes = await api.get('/menu/items');
+        menuItems = menuRes.data.data || [];
+        
+        // Create a lookup map for menu items by ID
+        menuItems.forEach((item: any) => {
+          menuItemMap[item._id] = item;
+        });
+      } catch (menuError) {
+        console.warn('Could not fetch menu items, categories will show as "Other":', menuError);
+      }
+
       // Filter orders by date range
       const now = new Date();
       const filteredOrders = orders.filter((order: any) => {
@@ -117,7 +133,13 @@ const Analytics: React.FC = () => {
       const revenueByCategory: Record<string, number> = {};
       activeOrders.forEach((order: any) => {
         order.items.forEach((item: any) => {
-          const category = item.category || 'Other';
+          // Extract the base menu item ID (remove timestamp if present)
+          const menuId = item.menuItemId?.split('-')[0] || item.menuItemId;
+          
+          // Look up the menu item to get its category
+          const menuItem = menuItemMap[menuId];
+          const category = menuItem?.category || 'Other';
+          
           revenueByCategory[category] = (revenueByCategory[category] || 0) + item.itemTotal;
         });
       });
@@ -275,24 +297,33 @@ const Analytics: React.FC = () => {
         <section className="admin-analytics-section admin-analytics-full-width">
           <h2 className="admin-analytics-section-title">📈 Daily Sales Trend</h2>
           <div className="admin-analytics-sales-chart">
-            {analytics.dailySales.map((day, idx) => {
-              const maxSales = Math.max(...analytics.dailySales.map(d => d.sales));
-              const barHeight = (day.sales / maxSales) * 100;
-              return (
-                <div key={idx} className="admin-analytics-chart-bar">
-                  <div
-                    className="admin-analytics-bar"
-                    style={{ height: `${barHeight}%` }}
-                    title={`Rs. ${day.sales.toLocaleString()}`}
-                  >
-                    <span className="admin-analytics-bar-value">Rs. {day.sales.toLocaleString()}</span>
-                  </div>
-                  <span className="admin-analytics-bar-label">
-                    {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-              );
-            })}
+            {analytics.dailySales.length > 0 ? (
+              (() => {
+                const maxSales = Math.max(...analytics.dailySales.map(d => d.sales), 1);
+                return analytics.dailySales.map((day, idx) => {
+                  const barHeight = Math.max((day.sales / maxSales) * 100, 5);
+                  return (
+                    <div key={idx} className="admin-analytics-chart-bar">
+                      <div
+                        className="admin-analytics-bar"
+                        style={{ height: `${barHeight}%` }}
+                        title={`${day.orderCount} orders - Rs. ${day.sales.toLocaleString()}`}
+                      >
+                        <span className="admin-analytics-bar-value">
+                          Rs. {day.sales.toLocaleString()}
+                        </span>
+                      </div>
+                      <span className="admin-analytics-bar-label">
+                        {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                      <span className="admin-analytics-bar-orders">{day.orderCount} orders</span>
+                    </div>
+                  );
+                });
+              })()
+            ) : (
+              <div className="admin-analytics-no-data">No sales data available for this period</div>
+            )}
           </div>
         </section>
 
