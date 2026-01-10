@@ -28,7 +28,7 @@ const Checkout: React.FC = () => {
   const location = useLocation();
   const { cartTotal, items, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const { tableNumber, diningType, lockTable, isTableLocked } = useTable();
+  const { tableNumber, diningType, lockTable } = useTable();
   const isGuestMode = location.pathname.includes('/guest');
   
   const [formData, setFormData] = useState<CheckoutFormData>({
