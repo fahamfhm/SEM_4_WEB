@@ -19,6 +19,15 @@ const UserManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'customer' | 'kitchen' | 'admin'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addUserForm, setAddUserForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    role: 'customer' as User['role']
+  });
+  const [addUserLoading, setAddUserLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -91,7 +100,40 @@ const UserManagement: React.FC = () => {
       }
     }
   };
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!addUserForm.name || !addUserForm.email || !addUserForm.phone || !addUserForm.password) {
+      alert('Please fill in all fields');
+      return;
+    }
 
+    if (addUserForm.password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+
+    setAddUserLoading(true);
+    try {
+      await api.post('/auth/register', addUserForm);
+      alert('User added successfully!');
+      setShowAddModal(false);
+      setAddUserForm({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        role: 'customer'
+      });
+      fetchUsers();
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      console.error('Error adding user:', error);
+      alert(error.response?.data?.message || 'Failed to add user');
+    } finally {
+      setAddUserLoading(false);
+    }
+  };
   const getRoleIcon = (role: User['role']) => {
     const icons: Record<User['role'], string> = {
       customer: '👤',
@@ -150,9 +192,14 @@ const UserManagement: React.FC = () => {
           <h1 className="admin-users-title">👥 User Management</h1>
           <p className="admin-users-subtitle">Manage all registered users</p>
         </div>
-        <button onClick={fetchUsers} className="admin-users-refresh">
-          🔄 Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={() => setShowAddModal(true)} className="admin-users-add-btn">
+            ➕ Add User
+          </button>
+          <button onClick={fetchUsers} className="admin-users-refresh">
+            🔄 Refresh
+          </button>
+        </div>
       </div>
 
       {/* Error Display */}
@@ -306,6 +353,100 @@ const UserManagement: React.FC = () => {
           Use the dropdown to change user roles. Delete button removes users from the system permanently.
         </span>
       </div>
+
+      {/* Add User Modal */}
+      {showAddModal && (
+        <div className="admin-users-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="admin-users-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-users-modal-header">
+              <h2>➕ Add New User</h2>
+              <button 
+                className="admin-users-modal-close" 
+                onClick={() => setShowAddModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleAddUser} className="admin-users-modal-form">
+              <div className="admin-users-form-group">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter full name"
+                  value={addUserForm.name}
+                  onChange={(e) => setAddUserForm({...addUserForm, name: e.target.value})}
+                  required
+                  disabled={addUserLoading}
+                />
+              </div>
+              <div className="admin-users-form-group">
+                <label>Email *</label>
+                <input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={addUserForm.email}
+                  onChange={(e) => setAddUserForm({...addUserForm, email: e.target.value})}
+                  required
+                  disabled={addUserLoading}
+                />
+              </div>
+              <div className="admin-users-form-group">
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  placeholder="Enter phone number"
+                  value={addUserForm.phone}
+                  onChange={(e) => setAddUserForm({...addUserForm, phone: e.target.value})}
+                  pattern="[0-9]{10,15}"
+                  required
+                  disabled={addUserLoading}
+                />
+              </div>
+              <div className="admin-users-form-group">
+                <label>Password *</label>
+                <input
+                  type="password"
+                  placeholder="Enter password (min 6 characters)"
+                  value={addUserForm.password}
+                  onChange={(e) => setAddUserForm({...addUserForm, password: e.target.value})}
+                  minLength={6}
+                  required
+                  disabled={addUserLoading}
+                />
+              </div>
+              <div className="admin-users-form-group">
+                <label>Role *</label>
+                <select
+                  value={addUserForm.role}
+                  onChange={(e) => setAddUserForm({...addUserForm, role: e.target.value as User['role']})}
+                  disabled={addUserLoading}
+                >
+                  <option value="customer">Customer</option>
+                  <option value="kitchen">Kitchen Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="admin-users-modal-actions">
+                <button 
+                  type="button" 
+                  className="admin-users-modal-cancel"
+                  onClick={() => setShowAddModal(false)}
+                  disabled={addUserLoading}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="admin-users-modal-submit"
+                  disabled={addUserLoading}
+                >
+                  {addUserLoading ? 'Adding...' : 'Add User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
