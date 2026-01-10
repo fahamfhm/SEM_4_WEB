@@ -8,6 +8,7 @@
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  background-color: aqua;
 }
 
 .kitchen-layout {
@@ -22,7 +23,6 @@
   min-height: 100dvh;
   min-width: 0; /* Prevent flex child from overflowing */
   padding: clamp(1rem, 4vw, 2rem);
-  padding-right: clamp(1rem, 12vw, 110px); /* Fluid sidebar space */
   background-color: var(--bg-light);
   overflow-x: hidden;
   width: 100%;
