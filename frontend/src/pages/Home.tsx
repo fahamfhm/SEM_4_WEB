@@ -11,13 +11,19 @@ const Home = () => {
   const { tableNumber, diningType, setTableInfo } = useTable();
   const { user, isAuthenticated, logout } = useAuth();
 
-  // Check for table parameter in URL when component mounts
+  // Check for table or takeaway parameter in URL when component mounts
   useEffect(() => {
     const tableParam = searchParams.get('table');
+    const typeParam = searchParams.get('type');
     
     if (tableParam) {
-      // QR code scanned with table number
+      // QR code scanned with table number (e.g., ?table=5)
       setTableInfo(tableParam, 'table');
+      // Remove the query parameter from URL for cleaner look
+      window.history.replaceState({}, '', '/');
+    } else if (typeParam === 'takeaway') {
+      // QR code scanned at cashier/counter (e.g., ?type=takeaway)
+      setTableInfo(null, 'takeaway');
       // Remove the query parameter from URL for cleaner look
       window.history.replaceState({}, '', '/');
     } else if (!tableNumber && !diningType) {
