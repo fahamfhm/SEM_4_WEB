@@ -49,6 +49,7 @@ const Sidebar = ({ role }: SidebarProps) => {
                 title={link.label}
               >
                 <span className="sb-nav-icon">{link.icon}</span>
+                <span className="sb-nav-label">{link.label}</span>
               </NavLink>
             </li>
           ))}
@@ -63,6 +64,7 @@ const Sidebar = ({ role }: SidebarProps) => {
           title="Logout"
         >
           <span className="sb-logout-icon">🚪</span>
+          <span className="sb-logout-label">Logout</span>
         </button>
       </div>
     </aside>

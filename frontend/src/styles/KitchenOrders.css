@@ -823,15 +823,44 @@
   }
 
   .kit-ord-filters {
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 0.5rem;
+    padding: 1rem;
+    padding-bottom: 1rem;
+    gap: 0.625rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+    width: calc(100% + 2rem);
+  }
+
+  .kit-ord-filters::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .kit-ord-filters::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .kit-ord-filters::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
   }
 
   .kit-ord-filter-btn {
     flex-shrink: 0;
     min-width: fit-content;
+    white-space: nowrap;
+    padding: 0.625rem 1rem;
+  }
+
+  .kit-ord-filter-label {
+    display: inline;
   }
 
   .kit-ord-grid {
@@ -906,13 +935,25 @@
   }
 
   .kit-ord-filters {
-    padding: 1rem;
+    padding: 0.875rem;
     margin-bottom: 1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+    width: calc(100% + 2rem);
+    gap: 0.5rem;
   }
 
   .kit-ord-filter-btn {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .kit-ord-filter-badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
   }
 
   .kit-ord-card {

@@ -247,7 +247,7 @@ const UserManagement: React.FC = () => {
             <tbody className="admin-users-tbody">
               {filteredUsers.map(user => (
                 <tr key={user._id} className="admin-users-tr">
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="User">
                     <div className="admin-users-user-cell">
                       <div className="admin-users-avatar">
                         {user.name.charAt(0).toUpperCase()}
@@ -255,21 +255,21 @@ const UserManagement: React.FC = () => {
                       <span className="admin-users-name">{user.name}</span>
                     </div>
                   </td>
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="Email">
                     <span className="admin-users-email">{user.email}</span>
                   </td>
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="Role">
                     <span className={`admin-users-role-badge ${getRoleBadgeClass(user.role)}`}>
                       {getRoleIcon(user.role)} {user.role}
                     </span>
                   </td>
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="Phone">
                     <span className="admin-users-phone">{user.phone || 'N/A'}</span>
                   </td>
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="Joined">
                     <span className="admin-users-date">{getTimeAgo(user.createdAt)}</span>
                   </td>
-                  <td className="admin-users-td">
+                  <td className="admin-users-td" data-label="Actions">
                     <div className="admin-users-actions">
                       <select
                         value={user.role}
