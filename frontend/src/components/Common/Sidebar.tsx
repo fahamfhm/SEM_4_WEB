@@ -56,7 +56,7 @@ const Sidebar = ({ role }: SidebarProps) => {
         </ul>
       </nav>
 
-      {/* <div className="sb-footer">
+      <div className="sb-footer">
         <button
           className="sb-logout-btn"
           onClick={handleLogout}
@@ -66,7 +66,7 @@ const Sidebar = ({ role }: SidebarProps) => {
           <span className="sb-logout-icon">🚪</span>
           <span className="sb-logout-label">Logout</span>
         </button>
-      </div> */}
+      </div>
     </aside>
   );
 };
