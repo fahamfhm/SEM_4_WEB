@@ -3,6 +3,7 @@ import api from './api';
 export interface RegisterData {
   name: string;
   email: string;
+  phone: string;
   password: string;
   role?: 'customer' | 'admin' | 'kitchen';
 }
