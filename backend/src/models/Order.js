@@ -74,6 +74,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  isTableLocked: {
+    type: Boolean,
+    default: false
+  },
+  tableLockedAt: {
+    type: Date,
+    required: false
+  },
   
   // Pricing
   subtotal: {

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../../styles/Checkout.css';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTable } from '../../context/TableContext';
 import OrderService from '../../services/orderService';
 
 interface CheckoutFormData {
@@ -27,10 +28,12 @@ const Checkout: React.FC = () => {
   const location = useLocation();
   const { cartTotal, items, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
+  const { tableNumber, diningType, lockTable } = useTable();
   const isGuestMode = location.pathname.includes('/guest');
   
   const [formData, setFormData] = useState<CheckoutFormData>({
-    orderType: 'dine-in',
+    orderType: diningType === 'table' ? 'dine-in' : 'takeaway',
+    tableNumber: tableNumber || undefined,
     paymentMethod: 'cash',
     specialNotes: '',
     customerName: '',
@@ -45,6 +48,23 @@ const Checkout: React.FC = () => {
     expiryDate: '',
     cvv: ''
   });
+
+  // Sync form data with table context
+  useEffect(() => {
+    if (tableNumber && diningType === 'table') {
+      setFormData(prev => ({
+        ...prev,
+        orderType: 'dine-in',
+        tableNumber: tableNumber
+      }));
+    } else if (diningType === 'takeaway') {
+      setFormData(prev => ({
+        ...prev,
+        orderType: 'takeaway',
+        tableNumber: undefined
+      }));
+    }
+  }, [tableNumber, diningType]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -155,6 +175,11 @@ const Checkout: React.FC = () => {
 
       // Create order in database
       const order = await OrderService.createOrder(orderData);
+      
+      // Lock table if it's a table order
+      if (formData.orderType === 'dine-in' && tableNumber && diningType === 'table') {
+        lockTable();
+      }
       
       console.log('Order created:', order);
       setPlacedOrderNumber(order.orderNumber);
@@ -286,26 +311,36 @@ const Checkout: React.FC = () => {
             {/* Order Type Section */}
             <section className="form-section">
               <h2>Order Type</h2>
-              <div className="order-type-tags">
-                <div 
-                  className={`order-tag ${formData.orderType === 'dine-in' ? 'active' : ''}`}
-                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'dine-in' }))}
-                >
-                  <span className="tag-icon">🍽️</span>
-                  <span className="tag-text">Dine-In</span>
+              {tableNumber && diningType === 'table' ? (
+                <div className="locked-table-info">
+                  <div className="info-badge table-locked">
+                    <span className="badge-icon">🔒</span>
+                    <span className="badge-text">Table {tableNumber} - Locked for your order</span>
+                  </div>
+                  <p className="info-note">✓ This table is reserved for your order</p>
                 </div>
-                <div 
-                  className={`order-tag ${formData.orderType === 'takeaway' ? 'active' : ''}`}
-                  onClick={() => setFormData(prev => ({ ...prev, orderType: 'takeaway' }))}
-                >
-                  <span className="tag-icon">🛍️</span>
-                  <span className="tag-text">Takeaway</span>
+              ) : (
+                <div className="order-type-tags">
+                  <div 
+                    className={`order-tag ${formData.orderType === 'dine-in' ? 'active' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, orderType: 'dine-in' }))}
+                  >
+                    <span className="tag-icon">🍽️</span>
+                    <span className="tag-text">Dine-In</span>
+                  </div>
+                  <div 
+                    className={`order-tag ${formData.orderType === 'takeaway' ? 'active' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, orderType: 'takeaway' }))}
+                  >
+                    <span className="tag-icon">🛍️</span>
+                    <span className="tag-text">Takeaway</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </section>
 
-            {/* Table Number (if Dine-In) */}
-            {formData.orderType === 'dine-in' && (
+            {/* Table Number (if Dine-In and not from QR) */}
+            {formData.orderType === 'dine-in' && !(tableNumber && diningType === 'table') && (
               <section className="form-section">
                 <h2>Table Number</h2>
                 <input

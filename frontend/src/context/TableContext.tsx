@@ -4,7 +4,9 @@ import type { ReactNode } from 'react';
 interface TableContextType {
   tableNumber: string | null;
   diningType: 'table' | 'takeaway' | null;
+  isTableLocked: boolean;
   setTableInfo: (tableNumber: string | null, diningType: 'table' | 'takeaway') => void;
+  lockTable: () => void;
   clearTableInfo: () => void;
 }
 
@@ -18,6 +20,10 @@ export function TableProvider({ children }: { children: ReactNode }) {
   const [diningType, setDiningType] = useState<'table' | 'takeaway' | null>(() => {
     const saved = localStorage.getItem('diningType') as 'table' | 'takeaway' | null;
     return saved || null;
+  });
+  const [isTableLocked, setIsTableLocked] = useState<boolean>(() => {
+    const saved = localStorage.getItem('isTableLocked');
+    return saved === 'true';
   });
 
   const setTableInfo = (newTableNumber: string | null, newDiningType: 'table' | 'takeaway') => {
@@ -34,15 +40,24 @@ export function TableProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const lockTable = () => {
+    if (tableNumber && diningType === 'table') {
+      setIsTableLocked(true);
+      localStorage.setItem('isTableLocked', 'true');
+    }
+  };
+
   const clearTableInfo = () => {
     setTableNumber(null);
     setDiningType(null);
+    setIsTableLocked(false);
     localStorage.removeItem('tableNumber');
     localStorage.removeItem('diningType');
+    localStorage.removeItem('isTableLocked');
   };
 
   return (
-    <TableContext.Provider value={{ tableNumber, diningType, setTableInfo, clearTableInfo }}>
+    <TableContext.Provider value={{ tableNumber, diningType, isTableLocked, setTableInfo, lockTable, clearTableInfo }}>
       {children}
     </TableContext.Provider>
   );
