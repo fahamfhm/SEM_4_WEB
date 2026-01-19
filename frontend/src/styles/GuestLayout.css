@@ -1,0 +1,25 @@
+/* Professional Guest Layout Styles */
+.guest-layout {
+  min-height: 100vh;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.guest-content {
+  flex: 1;
+  width: 100%;
+}
+
+
+
+.guest-layout main {
+  min-height: calc(100vh - 60px);
+}
+
+.guest-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}

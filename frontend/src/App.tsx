@@ -1,35 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
+
+import PublicLayout from "./layout/GuestLayout";
+import CustomerLayout from "./layout/CustomerLayout";
+import AdminLayout from "./layout/AdminLayout";
+import KitchenLayout from "./layout/KitchenLayout";
+import { TableProvider } from "./context/TableContext";
+import { AuthProvider } from "./context/AuthContext";
+
+//Auth Pages
+import AuthPage from "./pages/auth/AuthPage";
+
+// Customer Pages
+import CustomerMenu from "./pages/customer/Menu";
+import CustomerProfile from "./pages/customer/Profile";
+import CustomerCart from "./pages/customer/Cart";
+import Home from "./pages/Home";
+import OrderHistory from "./pages/customer/OrderHistory";
+import OrderTracking from "./pages/customer/OrderTracking";
+import Checkout from "./pages/customer/Checkout";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import MenuManagement from "./pages/admin/MenuManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import Analytics from "./pages/admin/Analytics";
+import OrderManagement from "./pages/admin/OrderManagement";
+
+// Kitchen Pages
+import KitchenOrders from "./pages/kitchen/Orders";
+import KitchenInventory from "./pages/kitchen/Inventory";
+import MenuAvailability from "./pages/kitchen/MenuAvailability";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <TableProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth">
+                <Route index element={<Navigate to="/auth/login" />} />
+                <Route path="login" element={<AuthPage mode="login" />} />
+                <Route path="register" element={<AuthPage mode="register" />} />
+              </Route>
+              {/* Guest Ordering Routes */}
+              <Route path="/guest">
+                <Route path="menu" element={<CustomerMenu />} />
+                <Route path="cart" element={<CustomerCart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="order-tracking" element={<OrderTracking />} />
+              </Route>
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="menu" element={<MenuManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
+
+            {/* Kitchen Routes */}
+            <Route path="/kitchen" element={<KitchenLayout />}>
+              <Route path="orders" element={<KitchenOrders />} />
+              <Route path="inventory" element={<KitchenInventory />} />
+              <Route path="menu-availability" element={<MenuAvailability />} />
+            </Route>
+
+            {/* Customer Routes (Logged In) */}
+            <Route path="/customer" element={<CustomerLayout />}>
+              <Route path="menu" element={<CustomerMenu />} />
+              <Route path="profile" element={<CustomerProfile />} />
+              <Route path="cart" element={<CustomerCart />} />
+              <Route path="orders" element={<OrderHistory />} />
+              <Route path="order-tracking" element={<OrderTracking />} />
+              <Route path="checkout" element={<Checkout />} />
+            </Route>
+          </Routes>
+        </TableProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

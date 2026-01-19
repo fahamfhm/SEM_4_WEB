@@ -1,0 +1,69 @@
+/* Professional Kitchen Layout Styles */
+.kitchen-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg-light);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: aqua;
+}
+
+.kitchen-layout {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.kitchen-main {
+  flex: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-width: 0; /* Prevent flex child from overflowing */
+  padding: clamp(1rem, 4vw, 2rem);
+  background-color: var(--bg-light);
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.kitchen-content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(0.5rem, 2vw, 1rem);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1024px) {
+  .kitchen-main {
+    padding: clamp(1rem, 3vw, 1.5rem);
+    padding-right: clamp(80px, 10vw, 100px); /* Fluid smaller sidebar space */
+  }
+}
+
+@media (max-width: 768px) {
+  .kitchen-main {
+    margin-left: 0;
+    padding: clamp(0.75rem, 3vw, 1.5rem);
+    padding-right: clamp(0.75rem, 3vw, 1rem); /* No sidebar space needed */
+    padding-bottom: clamp(70px, 12vh, 90px); /* Fluid bottom nav space */
+    width: 100%;
+    max-width: 100vw;
+  }
+  
+  .kitchen-content-wrapper {
+    padding: 0 clamp(0.25rem, 2vw, 0.5rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .kitchen-main {
+    padding: clamp(0.5rem, 2vw, 1rem);
+    padding-bottom: clamp(65px, 10vh, 75px); /* Fluid bottom nav space */
+  }
+}
