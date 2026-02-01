@@ -30,6 +30,7 @@ const Cart = () => {
 
   const handleContinueShopping = () => {
     navigate(isGuestMode ? '/guest/menu' : '/customer/menu')
+    
   }
 
   if (items.length === 0) {
