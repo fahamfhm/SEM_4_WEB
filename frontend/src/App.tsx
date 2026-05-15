@@ -6,6 +6,7 @@ import AdminLayout from "./layout/AdminLayout";
 import KitchenLayout from "./layout/KitchenLayout";
 import { TableProvider } from "./context/TableContext";
 import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/Common/ProtectedRoute";
 
 //Auth Pages
 import AuthPage from "./pages/auth/AuthPage";
@@ -55,29 +56,35 @@ function App() {
             </Route>
 
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="menu" element={<MenuManagement />} />
-              <Route path="orders" element={<OrderManagement />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="analytics" element={<Analytics />} />
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="menu" element={<MenuManagement />} />
+                <Route path="orders" element={<OrderManagement />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="analytics" element={<Analytics />} />
+              </Route>
             </Route>
 
             {/* Kitchen Routes */}
-            <Route path="/kitchen" element={<KitchenLayout />}>
-              <Route path="orders" element={<KitchenOrders />} />
-              <Route path="inventory" element={<KitchenInventory />} />
-              <Route path="menu-availability" element={<MenuAvailability />} />
+            <Route element={<ProtectedRoute allowedRoles={["kitchen"]} />}>
+              <Route path="/kitchen" element={<KitchenLayout />}>
+                <Route path="orders" element={<KitchenOrders />} />
+                <Route path="inventory" element={<KitchenInventory />} />
+                <Route path="menu-availability" element={<MenuAvailability />} />
+              </Route>
             </Route>
 
             {/* Customer Routes (Logged In) */}
-            <Route path="/customer" element={<CustomerLayout />}>
-              <Route path="menu" element={<CustomerMenu />} />
-              <Route path="profile" element={<CustomerProfile />} />
-              <Route path="cart" element={<CustomerCart />} />
-              <Route path="orders" element={<OrderHistory />} />
-              <Route path="order-tracking" element={<OrderTracking />} />
-              <Route path="checkout" element={<Checkout />} />
+            <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
+              <Route path="/customer" element={<CustomerLayout />}>
+                <Route path="menu" element={<CustomerMenu />} />
+                <Route path="profile" element={<CustomerProfile />} />
+                <Route path="cart" element={<CustomerCart />} />
+                <Route path="orders" element={<OrderHistory />} />
+                <Route path="order-tracking" element={<OrderTracking />} />
+                <Route path="checkout" element={<Checkout />} />
+              </Route>
             </Route>
           </Routes>
         </TableProvider>

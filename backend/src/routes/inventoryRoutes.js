@@ -13,14 +13,14 @@ import {
   getInventoryLogs,
   bulkDeductInventory,
 } from "../controllers/inventoryController.js";
-// import { protect, authorize } from "../middleware/auth.js"; // Uncomment when auth is ready
+import { protect, authorize } from "../middleware/auth.js"; // Uncomment when auth is ready
 
 const router = express.Router();
 
 // All inventory routes should be protected (Kitchen/Admin access)
 // Uncomment when auth is ready:
-// router.use(protect);
-// router.use(authorize("admin", "kitchen"));
+router.use(protect);
+router.use(authorize("admin", "kitchen"));
 
 // Get all inventory items with filtering
 router.get("/", getInventoryItems);

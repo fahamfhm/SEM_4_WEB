@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 // Load .env from backend directory
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
-const MONGODB_URI = process.env.MONGO_URI;
+const MONGODB_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 // Test users to seed
 const users = [
